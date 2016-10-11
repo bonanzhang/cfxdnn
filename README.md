@@ -1,8 +1,8 @@
 C++ wrapper for the MKLDNN primitives.
 
-Net - Container for layers. The user should only have to call fwd(), bkd() and update() methods of this object. Currently only sequencial networks. 
+Net - Container for layers. The user should only have to call fwd(), bkd() and update() member functions of this class. Currently only sequencial networks. 
   - potentiallly graph and sequential supports
-Layer - Superclass for various neural network layers. Conatins the weight and gradient.
+Layer - Base class for various neural network layers. Conatins the weight and gradient.
   - conv 
   - relu
   - maxpool
