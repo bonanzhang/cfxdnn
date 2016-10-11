@@ -1,15 +1,36 @@
 #include "relu_layer.h"
 
-void ReLULayer::initialize(std::vector<size_t*> dims) {
-  dnnLayout_t pLayout;
-  size_t strides[] = {1, dims[0][0], dims[0][0]*dims[0][1],dims[0][0]*dims[0][1]*dims[0][2]};
-  dnnLayoutCreate_F32(&pLayout, 2, dims[0], strides);
-  dnnReLUCreateForward_F32(&forward_p, NULL, pLayout, 0);
-  dnnReLUCreateBackward_F32(&backward_p, NULL, pLayout, pLayout, 0);
+ReLULayer::ReLULayer(ReLULayer::input_params* params, Layer* prev, Layer* next) {
+  params_ = params;
+
+  // Creating the forward primitive. The layout for the src (input for this layer) is 
+  // the layout of the previous layer's dst (output of prev)
+  prev->getFwdLayout(&src_layout, dnnResourceDst);
+  dnnReLUCreateForward_F32(&forward_p, NULL, src_layout, params_->negative_slope);
+
+  // Allocating space for dst
+  getFwdLayout(&dst_layout, dnnResourceDst);
+  dnnAllocateBuffer_F32((void**)&dnnResources[dnnResourceDst], dst_layout);
+
+  // Creating the backward primitive. The layout for the diffdst (input of this layer) 
+  // is the layout of the previous layer's diffsrc (output of prev)
+  next->getBwdLayout(&diffdst_layout, dnnResourceDiffSrc);
+  dnnReLUCreateBackward_F32(&backward_p, NULL, diffdst_layout, src_layout, params_->negative_slope);
+
+  // Allocating space for diffsrc
+  getBwdLayout(&diffsrc_layout, dnnResourceDiffSrc);
+  dnnAllocateBuffer_F32((void**)&dnnResources[dnnResourceDiffSrc], diffsrc_layout);
 }
 
-ReLULayer::ReLULayer(ReLULayer::input_params params) {
-  params_ = params;
+ReLULayer::~ReLULayer() {
+  dnnDelete_F32(forward_p);
+  dnnDelete_F32(backward_p);
+  dnnLayoutDelete_F32(src_layout);
+  dnnLayoutDelete_F32(dst_layout);
+  dnnLayoutDelete_F32(diffdst_layout);
+  dnnLayoutDelete_F32(diffsrc_layout);
+  dnnReleaseBuffer_F32(dnnResources[dnnResourceDiffSrc]);
+  dnnReleaseBuffer_F32(dnnResources[dnnResourceDiffDst]);
 }
 
 void ReLULayer::forward() {
@@ -22,19 +43,11 @@ void ReLULayer::backward() {
 
 void ReLULayer::update() {}
 
-void ReLULayer::setForwardInput(std::vector<void*> inputs) {
-  dnnResources[dnnResourceSrc] = inputs[0];
+void ReLULayer::getFwdLayout(dnnLayout_t* layout, dnnResourceType_t type) {
+  dnnLayoutCreateFromPrimitive_F32(layout, forward_p, type);
 }
 
-void ReLULayer::setForwardOutput(std::vector<void*> outputs) {
-  dnnResources[dnnResourceDst] = outputs[0];
-}
-
-void ReLULayer::setBackwardInput(std::vector<void*> inputs) {
-  dnnResources[dnnResourceDiffDst] = inputs[0];
-}
-
-void ReLULayer::setBackwardOutput(std::vector<void*> outputs) {
-  dnnResources[dnnResourceDiffSrc] = outputs[0];
+void ReLULayer::getBwdLayout(dnnLayout_t* layout, dnnResourceType_t type) {
+  dnnLayoutCreateFromPrimitive_F32(layout, backward_p, type);
 }
 

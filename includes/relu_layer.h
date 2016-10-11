@@ -4,20 +4,21 @@
 #include "layer.h"
 class ReLULayer : public Layer {
   public:
-    virtual void initialize(std::vector<size_t*>);
-    virtual void forward();
-    virtual void backward(); 
-    virtual void update();
+    void forward();
+    void backward(); 
+    void update();
+    void getFwdLayout(dnnLayout_t* playout, dnnResourceType_t type); 
+    void getBwdLayout(dnnLayout_t* playout, dnnResourceType_t type);
     struct input_params {
       float negative_slope = 0.0; 
     };
-    ReLULayer(input_params params);   
+    ReLULayer(input_params* params, Layer* previous_layer, Layer* next_layer);  
+    ~ReLULayer();
+    input_params* params_; 
   private:
-    input_params params_; 
-    void setForwardInput(std::vector<void*> inputs); 
-    void setForwardOutput(std::vector<void*> outputs); 
-    void setBackwardInput(std::vector<void*> inputs); 
-    void setBackwardOutput(std::vector<void*> outputs);
-
+    dnnLayout_t src_layout;
+    dnnLayout_t dst_layout;
+    dnnLayout_t diffdst_layout;
+    dnnLayout_t diffsrc_layout;
 }; 
 #endif // RELU_LAYER_H
