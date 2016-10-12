@@ -1,8 +1,8 @@
-#ifndef RELU_LAYER_H
-#define RELU_LAYER_H
+#ifndef DATA_LAYER_H
+#define DATA_LAYER_H
 
 #include "layer.h"
-class ReLULayer : public Layer {
+class DataLayer : public Layer {
   public:
     void forward();
     void backward(); 
@@ -12,15 +12,12 @@ class ReLULayer : public Layer {
     void getFwdLayout(dnnLayout_t* playout, dnnResourceType_t type); 
     void getBwdLayout(dnnLayout_t* playout, dnnResourceType_t type);
     struct input_params {
-      float negative_slope = 0.0; 
+      size_t* dims; 
     };
-    ReLULayer(input_params* params);  
-    ~ReLULayer();
-    input_params* params_; 
+    DataLayer(input_params* params);  
+    ~DataLayer();
+    input_params* params_;
   private:
-    dnnLayout_t src_layout;
-    dnnLayout_t dst_layout;
-    dnnLayout_t diffdst_layout;
-    dnnLayout_t diffsrc_layout;
+    dnnLayout_t dst_layout; 
 }; 
-#endif // RELU_LAYER_H
+#endif // DATA_LAYER_H

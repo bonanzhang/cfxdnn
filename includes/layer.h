@@ -10,6 +10,8 @@ class Layer {
     virtual void forward();
     virtual void backward(); 
     virtual void update();
+    virtual void initFwd(Layer* prev); 
+    virtual void initBwd(Layer* next);
     virtual void getFwdLayout(dnnLayout_t* playout, dnnResourceType_t type);
     virtual void getBwdLayout(dnnLayout_t* playout, dnnResourceType_t type);
     dnnPrimitive_t forward_p;
