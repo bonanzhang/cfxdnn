@@ -12,7 +12,10 @@ class DataLayer : public Layer {
     void getFwdLayout(dnnLayout_t* playout, dnnResourceType_t type); 
     void getBwdLayout(dnnLayout_t* playout, dnnResourceType_t type);
     struct input_params {
-      size_t* dims; 
+      size_t batch_size;
+      size_t input_c;
+      size_t input_h;
+      size_t input_w; 
     };
     DataLayer(input_params* params);  
     ~DataLayer();

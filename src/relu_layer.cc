@@ -9,7 +9,7 @@ void ReLULayer::initFwd(Layer* prev) {
   // Creating the forward primitive. The layout for the src (input for this layer) is 
   // the layout of the previous layer's dst (output of prev)
   prev->getFwdLayout(&src_layout, dnnResourceDst);
-  dnnReLUCreateForward_F32(&forward_p, NULL, src_layout, params_->negative_slope);
+  dnnReLUCreateForward_F32(&forward_p, NULL, src_layout, params_.negative_slope);
 
   // Allocating space for dst
   getFwdLayout(&dst_layout, dnnResourceDst);
@@ -20,7 +20,7 @@ void ReLULayer::initBwd(Layer* next) {
   // Creating the backward primitive. The layout for the diffdst (input of this layer) 
   // is the layout of the previous layer's diffsrc (output of prev)
   next->getBwdLayout(&diffdst_layout, dnnResourceDiffSrc);
-  dnnReLUCreateBackward_F32(&backward_p, NULL, diffdst_layout, src_layout, params_->negative_slope);
+  dnnReLUCreateBackward_F32(&backward_p, NULL, diffdst_layout, src_layout, params_.negative_slope);
 
   // Allocating space for diffsrc
   getBwdLayout(&diffsrc_layout, dnnResourceDiffSrc);
