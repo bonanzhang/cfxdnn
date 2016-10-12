@@ -1,6 +1,6 @@
 #include "relu_layer.h"
 
-ReLULayer::ReLULayer(ReLULayer::input_params* params) {
+ReLULayer::ReLULayer(ReLULayer::input_params params) {
   params_ = params;
 }
 

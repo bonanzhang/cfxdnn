@@ -1,6 +1,6 @@
 #include "data_layer.h"
 
-DataLayer::DataLayer(DataLayer::input_params* params) {
+DataLayer::DataLayer(DataLayer::input_params params) {
   params_ = params;
 }
 

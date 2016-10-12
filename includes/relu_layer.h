@@ -16,7 +16,7 @@ class ReLULayer : public Layer {
     };
     ReLULayer(input_params* params);  
     ~ReLULayer();
-    input_params* params_; 
+    input_params params_; 
   private:
     dnnLayout_t src_layout;
     dnnLayout_t dst_layout;

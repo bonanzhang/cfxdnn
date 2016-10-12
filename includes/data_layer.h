@@ -16,7 +16,7 @@ class DataLayer : public Layer {
     };
     DataLayer(input_params* params);  
     ~DataLayer();
-    input_params* params_;
+    input_params params_;
   private:
     dnnLayout_t dst_layout; 
 }; 
