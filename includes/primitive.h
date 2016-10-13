@@ -33,8 +33,10 @@ class Primitive {
     // Initialize the buffers and "connect" the layers in a
     // neural network. This is done automatically by network 
     // objects (e.g. sequencial_network)
-    void setFwdInput(void* prev_dst);
-    void setBwdInput(void* next_src);
+    void setFwdInput(void* src);
+    void setFwdOutput(void* dst);
+    void setBwdInput(void* diffdst);
+    void setBwdOutput(void* diffsrc);
     // Get pointer to buffer (resource). Used to get, for 
     // example, the weights of a given layer
     void* getResource(dnnResourceType_t type);
@@ -43,6 +45,9 @@ class Primitive {
     dnnPrimitive_t forward_p;
     dnnPrimitive_t backward_p;
     // Contains the resources. Use getResource() to access.
-    void* layer_resources[dnnResourceNumber]; 
+    void* resources[dnnResourceNumber];
+    // Vector containing requested resources
+    std::vector<dnnResourceType_t> requested_fwd_resources;
+    std::vector<dnnResourceType_t> requested_bwd_resources;
 };
 #endif // PRIMITIVE_H

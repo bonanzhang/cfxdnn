@@ -1,53 +1,42 @@
 #include "primitive.h"
 
-Primitive::Primitive(vector<size_t> const &input_dims, vector<size_t> &output_dims) {
+Primitive::Primitive(Layer* l, vector<size_t> const &src_dimentions, vector<size_t> &dst_dimensions) {
+  // TODO? Maybe check for dimension here
+  // Vector containing resouce types that are requested by the layer
+  l->createPrimitives(src_dimensions, dst_dimensions, forward_p, backward_p, requested_fwd_resources, requested_bwd_resources);
 
-  const size_t dimention = input_dims.size();
-  /* if(dimention != 4) { do something } */
-
-  //TODO: generalize
-  // Computing Dimensions. ReLU does not change size. 
-  std::copy(input_dims.begin(), input_dims.end(), output_dims.begin());
-  
-  // Making a copy of input and output dims because the primitive
-  // needs size_t*. Also computing the strides for layout
-  size_t input_dims_[dimention], output_dims_[dimention];
-  for(int i = 0; i < dimention; i++) { 
-    input_dims_[i] = input_dims[i]; 
-    output_dims_[i] = output_dims[i]; 
+  // Allocating requested resources 
+  for(int i = 0; i < requested_fwd_resources.size(); i++) {
+    dnnLayout_t pLayout;
+    dnnLayoutCreateFromPrimitive(&pLayout, forward_p, requested_fwd_resources[i]);
+    if(playout) { 
+      dnnAllocateBuffer(resources[i], pLayout);
+      dnnLayoutDelete(pLayout);
+    } // else {TODO}
   }
-  size_t input_strides_[4] = {1,
-                              input_dims_[0],
-                              input_dims_[0]*input_dims_[1],
-                              input_dims_[0]*input_dims_[1]*input_dims_[2]};
-  size_t output_strides_[4] = {1,
-                              output_dims_[0],
-                              output_dims_[0]*output_dims_[1],
-                              output_dims_[0]*output_dims_[1]*output_dims_[2]};
-
-  // Creating the forward primitive. 
-  dnnLayout_t src_layout;
-  dnnLayoutCreate_F32(&src_layout, dimention, input_dims_, input_strides_);
-  //TODO: call layer specific stuff
-  dnnReLUCreateForward_F32(&forward_p, NULL, src_layout, params_.negative_slope);
-
-  // Creating the backward primitive.
-  dnnLayout_t diffdst_layout;
-  dnnLayoutCreate_F32(&diffdst_layout, dimention, output_dims_, output_strides_);
-  dnnReLUCreateBackward_F32(&backward_p, NULL, diffdst_layout, src_layout, params_.negative_slope);
-
-  // 
-  dnnLayoutDelete_F32(diffdst_layout);
-  dnnLayoutDelete_F32(src_layout);
-
+  for(int i = 0; i < requested_bwd_resources.size(); i++) {
+    dnnLayout_t pLayout;
+    dnnLayoutCreateFromPrimitive(&pLayout, backward_p, requested_bwd_resources[i]);
+    if(playout) { 
+      dnnAllocateBuffer(resources[i], pLayout);
+      dnnLayoutDelete(pLayout);
+    } // else {TODO}
+  }
 }
 
 Primitive::~Primitive() {
-  if(forward_p){dnnDelete_F32(forward_p);}
-  if(backward_p){dnnDelete_F32(backward_p);}
-  if(dst_layout){dnnLayoutDelete_F32(dst_layout);}
-  if(diffdst_layout){dnnLayoutDelete_F32(diffdst_layout);}
-  if(diffsrc_layout){dnnLayoutDelete_F32(diffsrc_layout);}
+  // Delete the primitives
+  dnnDelete(forward_p);
+  dnnDelete(backward_p);
+  // Release Forward resources
+  for(int i = 0; i < requested_fwd_resources.size(); i++) {
+    dnnReleaseBuffer(resources[i]);
+  }
+  // Release Bacward resources
+  for(int i = 0; i < requested_bwd_resources.size(); i++) {
+    dnnReleaseBuffer(resources[i]);
+  }
+  // TODO: Delete vectors?
 }
 
 void Primitive::forward() {
@@ -61,9 +50,17 @@ void Primitive::backward() {
 void Primitive::update(Optimizer opt) {
   //TODO: update sometimes, depending on the layer
 }
-void Primitive::setFwdInput(void* prev_dst) {
+
+void setFwdInput(void* src) {
 }
-void Primitive::setBwdInput(void* next_src) {
+
+void setFwdOutput(void* dst) {
+}
+
+void setBwdInput(void* diffdst) {
+}
+
+void setBwdOutput(void* diffsrc) {
 }
 
 void* ReLULayer::getResource(dnnResourceType_t type) {
