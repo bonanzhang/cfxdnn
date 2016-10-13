@@ -28,8 +28,8 @@ void SequentialNetwork::finalize_layers() {
     input_dimensions.push_back(height_);
     input_dimensions.push_back(channel_);
     input_dimensions.push_back(batch_size_);
-    std::vector<size_t> output_dimensions;
     for (int i = 0; i < layers_.size(); i++) {
+        std::vector<size_t> output_dimensions;
         // each time a primitive is contructed,
         // it requires the input tensor dimensions
         // it gives back the output tensor dimensions,
