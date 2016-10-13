@@ -1,27 +1,33 @@
 #ifndef SEQUENTIAL_NETWORK_H
 #define SEQUENTIAL_NETWORK_H
-#include "layer.h"
-#include <vector>
+#include "primitive.h"
 // A container wrapper around the MKL DNN primitives
 // Each of the primitives is wrapped in a "Layer"
 // This is a collection of those layers
 // and a set of operations on every one of those.
+// non-obvious logic:
+// each layer has a primitive, which acts on some resources
+// these resources are divided among the layers and the network
+// for example, the network holds the data buffers between layers
+// and the layers themselves hold their own weights and gradients
 class SequentialNetwork {
-  private:
-    std::vector<Layer *> net_;
   public:
-    // add a layer to the network
-    // the network is ordered like a queue:
-    // the first layer added runs first
-    void add_layer(Layer *l);
-    // trains for some number of iterations
+    SequentialNetwork(size_t batch_size, size_t channel, size_t height, size_t width);
+    ~SequentialNetwork();
+    int add_layer(Layer *l);
+    void finalize_layers();
     void train();
-    // the next three functions should be called one after another
-    // in a loop
-    // they are individually exposed for analysis of intermediate states
-    // like the weights
     void forward();
     void backward();
-    void update();
+    void update(Optimizer *opt);
+  private:
+    std::vector<Layer *> layers_;
+    std::vector<Primitive *> net_;
+    size_t batch_size_;
+    size_t channel_;
+    size_t height_;
+    size_t width_;
+    std::vector<void *> data_tensors_;
+    std::vector<void *> gradient_tensors_;
 };
 #endif // SEQUENTIAL_NETWORK_H
