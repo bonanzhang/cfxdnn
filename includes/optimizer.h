@@ -3,7 +3,7 @@
 
 class Optimizer {
   public:
-    virtual void applyOptimization(float* weights, float* grad);
+    virtual void applyOptimization(float* weights, float* grad, size_t n);
 };
 
 #endif // OPTIMIZER_H

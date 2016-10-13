@@ -6,21 +6,19 @@ class DataLayer : public Layer {
   public:
     void forward();
     void backward(); 
-    void update();
-    void initFwd(Layer* prev);
-    void initBwd(Layer* next);
+    void update(Optimizer opt);
+    void setFwdInput(void* prev_dst);
+    void setBwdInput(void* next_src);
     void getFwdLayout(dnnLayout_t* playout, dnnResourceType_t type); 
     void getBwdLayout(dnnLayout_t* playout, dnnResourceType_t type);
+    void* getResource(dnnResourceType_t type);
     struct input_params {
       size_t batch_size;
       size_t input_c;
       size_t input_h;
       size_t input_w; 
     };
-    DataLayer(input_params* params);  
-    ~DataLayer();
+    DataLayer(input_params params);  
     input_params params_;
-  private:
-    dnnLayout_t dst_layout; 
 }; 
 #endif // DATA_LAYER_H

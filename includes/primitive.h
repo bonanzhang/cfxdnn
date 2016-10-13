@@ -21,8 +21,8 @@
 class Primitive {
   public:
     Primitive(Layer *l,
-              vector<size_t> const &input_dimensions,
-              vector<size_t> &output_dimensions);
+              std::vector<size_t> const &input_dimensions,
+              std::vector<size_t> &output_dimensions);
     ~Primitive();
     // Forward Propagation for this layer.
     void forward();
@@ -46,6 +46,7 @@ class Primitive {
     dnnPrimitive_t backward_p;
     // Contains the resources. Use getResource() to access.
     void* resources[dnnResourceNumber];
+    size_t resource_sizes[dnnResourceNumber];
     // Vector containing requested resources
     std::vector<dnnResourceType_t> requested_fwd_resources;
     std::vector<dnnResourceType_t> requested_bwd_resources;

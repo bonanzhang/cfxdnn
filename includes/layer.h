@@ -15,6 +15,7 @@ public:
                                 std::vector<size_t> &dst_dimensions, 
                                 dnnPrimitive_t *fwd_p,
                                 dnnPrimitive_t *bwd_p,
-                                std::vector<dnnResourceType_t> &requested_resources);
+                                std::vector<dnnResourceType_t> &requested_fwd_resources,
+                                std::vector<dnnResourceType_t> &requested_bwd_resources);
 };
 #endif // LAYER_H

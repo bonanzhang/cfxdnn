@@ -1,68 +1,86 @@
 #include "primitive.h"
 
-Primitive::Primitive(Layer* l, vector<size_t> const &src_dimentions, vector<size_t> &dst_dimensions) {
+Primitive::Primitive(Layer* l, std::vector<size_t> const &src_dimensions, std::vector<size_t> &dst_dimensions) {
   // TODO? Maybe check for dimension here
   // Vector containing resouce types that are requested by the layer
-  l->createPrimitives(src_dimensions, dst_dimensions, forward_p, backward_p, requested_fwd_resources, requested_bwd_resources);
+  l->createPrimitives(src_dimensions, dst_dimensions, &forward_p, &backward_p, requested_fwd_resources, requested_bwd_resources);
 
+  // Initializing resource pointers to null (needed for the update() to work) 
+  for(int i = 0; i < dnnResourceNumber; i++) {
+    resources[i] = NULL;
+  }  
   // Allocating requested resources 
   for(int i = 0; i < requested_fwd_resources.size(); i++) {
     dnnLayout_t pLayout;
-    dnnLayoutCreateFromPrimitive(&pLayout, forward_p, requested_fwd_resources[i]);
-    if(playout) { 
-      dnnAllocateBuffer(resources[i], pLayout);
-      dnnLayoutDelete(pLayout);
+    dnnLayoutCreateFromPrimitive_F32(&pLayout, forward_p, requested_fwd_resources[i]);
+    if(pLayout) { 
+      dnnAllocateBuffer_F32(&resources[i], pLayout);
+      resource_sizes[i] = dnnLayoutGetMemorySize_F32(pLayout)/sizeof(float);
+      dnnLayoutDelete_F32(pLayout);
     } // else {TODO}
   }
   for(int i = 0; i < requested_bwd_resources.size(); i++) {
     dnnLayout_t pLayout;
-    dnnLayoutCreateFromPrimitive(&pLayout, backward_p, requested_bwd_resources[i]);
-    if(playout) { 
-      dnnAllocateBuffer(resources[i], pLayout);
-      dnnLayoutDelete(pLayout);
+    dnnLayoutCreateFromPrimitive_F32(&pLayout, backward_p, requested_bwd_resources[i]);
+    if(pLayout) { 
+      dnnAllocateBuffer_F32(&resources[i], pLayout);
+      resource_sizes[i] = dnnLayoutGetMemorySize_F32(pLayout)/sizeof(float);
+      dnnLayoutDelete_F32(pLayout);
     } // else {TODO}
   }
 }
 
 Primitive::~Primitive() {
   // Delete the primitives
-  dnnDelete(forward_p);
-  dnnDelete(backward_p);
+  dnnDelete_F32(forward_p);
+  dnnDelete_F32(backward_p);
   // Release Forward resources
   for(int i = 0; i < requested_fwd_resources.size(); i++) {
-    dnnReleaseBuffer(resources[i]);
+    dnnReleaseBuffer_F32(resources[i]);
   }
-  // Release Bacward resources
+  // Release Backward resources
   for(int i = 0; i < requested_bwd_resources.size(); i++) {
-    dnnReleaseBuffer(resources[i]);
+    dnnReleaseBuffer_F32(resources[i]);
   }
-  // TODO: Delete vectors?
 }
 
 void Primitive::forward() {
-  dnnExecute_F32(forward_p, layer_resources);
+  dnnExecute_F32(forward_p, resources);
 }
 
 void Primitive::backward() {
-  dnnExecute_F32(backward_p, layer_resources);
+  dnnExecute_F32(backward_p, resources);
 }
 
-void Primitive::update(Optimizer opt) {
-  //TODO: update sometimes, depending on the layer
+void Primitive::update(Optimizer* opt) {
+  if(resources[dnnResourceFilter] && resources[dnnResourceDiffFilter]) {
+    opt->applyOptimization((float*) resources[dnnResourceFilter], 
+                           (float*) resources[dnnResourceDiffFilter],
+                           resource_sizes[dnnResourceFilter]);
+  }
+  if(resources[dnnResourceBias] && resources[dnnResourceDiffBias]) {
+    opt->applyOptimization((float*) resources[dnnResourceBias], 
+                           (float*) resources[dnnResourceDiffBias],
+                           resource_sizes[dnnResourceBias]);
+  }
 }
 
-void setFwdInput(void* src) {
+void Primitive::setFwdInput(void* src) {
+  resources[dnnResourceSrc] = src;
 }
 
-void setFwdOutput(void* dst) {
+void Primitive::setFwdOutput(void* dst) {
+  resources[dnnResourceDst] = dst;
 }
 
-void setBwdInput(void* diffdst) {
+void Primitive::setBwdInput(void* diffdst) {
+  resources[dnnResourceDiffDst] = diffdst;
 }
 
-void setBwdOutput(void* diffsrc) {
+void Primitive::setBwdOutput(void* diffsrc) {
+  resources[dnnResourceDiffSrc] = diffsrc;
 }
 
-void* ReLULayer::getResource(dnnResourceType_t type) {
-  return layer_resources[type];
+void* Primitive::getResource(dnnResourceType_t type) {
+  return resources[type];
 }
