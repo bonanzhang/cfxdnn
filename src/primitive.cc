@@ -1,5 +1,5 @@
 #include "primitive.h"
-
+#include <iostream>
 Primitive::Primitive(Layer *l, std::vector<size_t> const &src_dimensions, std::vector<size_t> &dst_dimensions) {
   // Initializing resource pointers to null (needed for the update() to work) 
   for(int i = 0; i < dnnResourceNumber; i++) {
@@ -17,6 +17,7 @@ Primitive::Primitive(Layer *l, std::vector<size_t> const &src_dimensions, std::v
                       forward_p, backward_p, 
                       requested_fwd_resources, requested_bwd_resources);
   // Allocating requested resources 
+  std::cout << "allocating resources" << std::endl;
   for(int i = 0; i < requested_fwd_resources.size(); i++) {
     for(int j = 0; j < requested_fwd_resources[i].size(); j++) {
       dnnLayout_t pLayout;

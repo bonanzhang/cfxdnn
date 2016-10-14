@@ -13,6 +13,7 @@ void FullyConnectedLayer::createPrimitives(std::vector<size_t> const &src_dimens
   /* TODO: if(dimension != 4) { do something } */
   // Computing Dimensions. FullyConnected does not change size. 
   dst_dimensions.push_back(src_dimensions[0]); 
+
   size_t collapsed_size = 1;
   for(int i = 1; i < dimension; i++) {
     collapsed_size *= src_dimensions[i];

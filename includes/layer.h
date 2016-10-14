@@ -17,9 +17,9 @@ public:
                                 std::vector<dnnPrimitive_t> &bwd_p,
                                 std::vector<std::vector<dnnResourceType_t>> &requested_fwd_resources,
                                 std::vector<std::vector<dnnResourceType_t>> &requested_bwd_resources
-                                ); 
+                                ) = 0; 
   // Returns the number of primitives needed
-  virtual size_t getNumberOfFwdPrimitives();
-  virtual size_t getNumberOfBwdPrimitives();
+  virtual size_t getNumberOfFwdPrimitives() = 0;
+  virtual size_t getNumberOfBwdPrimitives() = 0;
 };
 #endif // LAYER_H

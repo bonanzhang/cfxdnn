@@ -12,7 +12,7 @@ void ReLULayer::createPrimitives(std::vector<size_t> const &src_dimensions,
 
   const size_t dimension = src_dimensions.size();
   // Computing Dimensions. ReLU does not change size. 
-  std::copy(src_dimensions.begin(), src_dimensions.end(), dst_dimensions.begin());
+  std::copy(src_dimensions.begin(), src_dimensions.end(), std::back_inserter(dst_dimensions));
   
   // Making a copy of input and output dims because the primitive
   // needs size_t*. Also computing the strides for layout
@@ -29,7 +29,6 @@ void ReLULayer::createPrimitives(std::vector<size_t> const &src_dimensions,
     dst_strides_[i] = dst_stride;
     dst_stride *= dst_dimensions[i]; 
   }
-
   // Creating ReLU primitive. Link to MKL page on ReLU primitive:
   // https://software.intel.com/en-us/node/684774
   // Creating Layouts needed for primitives
