@@ -10,16 +10,26 @@
 // these resources are divided among the layers and the network
 // for example, the network holds the data buffers between layers
 // and the layers themselves hold their own weights and gradients
+//
+// example usage:
+// SequentialNetwork net;
+// net.add(new ConvLayer(...));
+// net.add(new ReLULayer(...));
+// net.add(new MaxPLayer(...));
 class SequentialNetwork {
   public:
     SequentialNetwork(size_t batch_size, size_t channel, size_t height, size_t width);
     ~SequentialNetwork();
+    // each time you add a layer, you get the 0-indexed id of that layer
     int add_layer(Layer *l);
+    // must call this after adding all the layers
+    // finalize also will initialize all the weights
     void finalize_layers();
-    void train();
+    //training with 
+    void train(void *X, void *y, Optimizer *o);
     void forward();
     void backward();
-    void update(Optimizer *opt);
+    void update(Optimizer *opt, float learning_rate);
   private:
     std::vector<Layer *> layers_;
     std::vector<Primitive *> net_;
