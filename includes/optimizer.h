@@ -3,7 +3,7 @@
 #include <stdlib.h>
 class Optimizer {
   public:
-    virtual void applyOptimization(float* weights, float* grad, size_t n, float learning_rate);
+    virtual void applyOptimization(float* weights, float* grad, size_t n, float learning_rate) = 0;
 };
 
 #endif // OPTIMIZER_H
