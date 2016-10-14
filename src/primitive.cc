@@ -1,6 +1,6 @@
 #include "primitive.h"
 
-Primitive::Primitive(Layer const *l, std::vector<size_t> const &src_dimensions, std::vector<size_t> &dst_dimensions) {
+Primitive::Primitive(Layer *l, std::vector<size_t> const &src_dimensions, std::vector<size_t> &dst_dimensions) {
   // Initializing resource pointers to null (needed for the update() to work) 
   for(int i = 0; i < dnnResourceNumber; i++) {
     resources[i] = NULL;
