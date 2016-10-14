@@ -3,8 +3,8 @@
 #include <mkl.h>
 #include <vector>
 #include "optimizer.h"
+#include "initializer.h"
 #include "layer.h"
-// TODO: fix this paragraph
 // Parent Class for all neural network layers. 
 // This class contains the information about the parameters
 // required toreconstruct the layer (e.g. kernel size for 
@@ -30,6 +30,8 @@ class Primitive {
     void backward(); 
     // Updates weights of the layer based on the gradients.
     void update(Optimizer* opt, float learning_rate);
+    // Fills the primitive's weights, if applicable
+    void initialize(Initializer *ini);
     // "Connect" the layers in a neural network. This is done 
     // automatically by network objects (e.g. sequencial_network)
     void setFwdInput(void* src);

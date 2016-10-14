@@ -62,7 +62,11 @@ void SequentialNetwork::finalize_layers() {
         net_[i]->setBwdInput(gradient_tensors_[i]);
         net_[i]->setBwdOutput(gradient_tensors_[i+1]);
     }
-    // TODO: initialize each primitive's weights
+    // initialize each primitive's weights
+    Initializer init;
+    for (int i = 0; i < net_.size(); i++) {
+        net_[i]->initialize(&init);
+    }
 }
 void SequentialNetwork::train(void *X, void *y, Optimizer *o) {
     data_tensors_[0] = X;
