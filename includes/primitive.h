@@ -29,10 +29,9 @@ class Primitive {
     // Backward Propagation for this layer.
     void backward(); 
     // Updates weights of the layer based on the gradients.
-    void update(Optimizer* opt);
-    // Initialize the buffers and "connect" the layers in a
-    // neural network. This is done automatically by network 
-    // objects (e.g. sequencial_network)
+    void update(Optimizer* opt, float learning_rate);
+    // "Connect" the layers in a neural network. This is done 
+    // automatically by network objects (e.g. sequencial_network)
     void setFwdInput(void* src);
     void setFwdOutput(void* dst);
     void setBwdInput(void* diffdst);
@@ -42,13 +41,12 @@ class Primitive {
     void* getResource(dnnResourceType_t type);
   protected:
     // dnnPrimitives is the Intel MKL computational kernel 
-    dnnPrimitive_t forward_p;
-    dnnPrimitive_t backward_p;
+    std::vector<dnnPrimitive_t> forward_p;
+    std::vector<dnnPrimitive_t> backward_p;
     // Contains the resources. Use getResource() to access.
     void* resources[dnnResourceNumber];
     size_t resource_sizes[dnnResourceNumber];
-    // Vector containing requested resources
-    std::vector<dnnResourceType_t> requested_fwd_resources;
-    std::vector<dnnResourceType_t> requested_bwd_resources;
+    std::vector<std::vector<dnnResourceType_t>> requested_fwd_resources;
+    std::vector<std::vector<dnnResourceType_t>> requested_bwd_resources;
 };
 #endif // PRIMITIVE_H

@@ -13,10 +13,12 @@ public:
   //   requested_resources
   void createPrimitives(std::vector<size_t> const &src_dimensions,
                         std::vector<size_t> &dst_dimensions,
-                        dnnPrimitive_t *fwd_p,
-                        dnnPrimitive_t *bwd_p,
-                        std::vector<dnnResourceType_t> &requested_fwd_resources,
-                        std::vector<dnnResourceType_t> &requested_bwd_resources);
+                        std::vector<dnnPrimitive_t> &fwd_p,
+                        std::vector<dnnPrimitive_t> &bwd_p,
+                        std::vector<std::vector<dnnResourceType_t>> &requested_fwd_resources,
+                        std::vector<std::vector<dnnResourceType_t>> &requested_bwd_resources);
+  size_t getNumberOfFwdPrimitives();
+  size_t getNumberOfBwdPrimitives();
 private:
   float negative_slope_;
 };
