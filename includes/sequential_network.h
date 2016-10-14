@@ -3,6 +3,7 @@
 #include "primitive.h"
 #include "layer.h"
 #include "softmax_objective.h"
+#include <iostream>
 // A container wrapper around the MKL DNN primitives
 // Each of the primitives is wrapped in a "Layer"
 // This is a collection of those layers
@@ -21,7 +22,8 @@
 using std::vector;
 class SequentialNetwork {
   public:
-    SequentialNetwork(size_t batch_size, size_t channel, size_t height, size_t width);
+    SequentialNetwork(size_t batch_size, size_t channel, 
+                      size_t height, size_t width, size_t classes);
     ~SequentialNetwork();
     // each time you add a layer, you get the 0-indexed id of that layer
     int add_layer(Layer *l);
@@ -41,6 +43,7 @@ class SequentialNetwork {
     size_t channel_;
     size_t height_;
     size_t width_;
+    size_t classes_;
     vector<void *> data_tensors_;
     vector<void *> gradient_tensors_;
 };

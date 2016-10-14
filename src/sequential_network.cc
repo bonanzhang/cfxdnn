@@ -1,9 +1,14 @@
 #include "sequential_network.h"
-SequentialNetwork::SequentialNetwork(size_t batch_size, size_t channel, size_t height, size_t width) {
+SequentialNetwork::SequentialNetwork(size_t batch_size, 
+                                     size_t channel, 
+                                     size_t height, 
+                                     size_t width, 
+                                     size_t classes) {
     batch_size_ = batch_size;
     channel_ = channel;
     height_ = height;
     width_ = width;
+    classes_ = classes;
 }
 SequentialNetwork::~SequentialNetwork() {
     for (auto r : data_tensors_) {
@@ -42,13 +47,20 @@ void SequentialNetwork::finalize_layers() {
         // the tensor resources are allocated here
         // the data and the gradient tensors have the same dimensions
         // this is WHCN
-        size_t sizes[4] = {output_dimensions[0], 
-                           output_dimensions[1],
-                           output_dimensions[2],
-                           output_dimensions[3]};
-        size_t strides[4] = {1, sizes[0], sizes[0]*sizes[1], sizes[0]*sizes[1]*sizes[2]};
+        size_t const dim = output_dimensions.size();
+        std::cout << dim << std::endl;
+        size_t sizes[dim];
+        for (int i = 0; i < dim; i++) {
+            sizes[i] = output_dimensions[i];
+        }
+        size_t str = 1;
+        size_t strides[dim];
+        for (int i = 0; i < dim; i++) {
+            strides[i] = str;
+            str *= sizes[i];
+        }
         dnnLayout_t layout;
-        dnnLayoutCreate_F32(&layout, 4, sizes, strides);
+        dnnLayoutCreate_F32(&layout, dim, sizes, strides);
         void *data;
         void *gradient;
         dnnAllocateBuffer_F32(&data, layout);
