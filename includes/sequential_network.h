@@ -1,6 +1,8 @@
 #ifndef SEQUENTIAL_NETWORK_H
 #define SEQUENTIAL_NETWORK_H
 #include "primitive.h"
+#include "layer.h"
+#include "softmax_objective.h"
 // A container wrapper around the MKL DNN primitives
 // Each of the primitives is wrapped in a "Layer"
 // This is a collection of those layers
@@ -16,6 +18,7 @@
 // net.add(new ConvLayer(...));
 // net.add(new ReLULayer(...));
 // net.add(new MaxPLayer(...));
+using std::vector;
 class SequentialNetwork {
   public:
     SequentialNetwork(size_t batch_size, size_t channel, size_t height, size_t width);
@@ -26,18 +29,19 @@ class SequentialNetwork {
     // finalize also will initialize all the weights
     void finalize_layers();
     //training with 
-    void train(void *X, void *y, Optimizer *o);
-    void forward();
+    void train(void *X, vector<size_t> const &truth, Optimizer *o);
+    void forward(void *X);
+    float getLoss(SoftMaxObjective *obj, vector<size_t> const &truth);
     void backward();
     void update(Optimizer *opt, float learning_rate);
   private:
-    std::vector<Layer *> layers_;
-    std::vector<Primitive *> net_;
+    vector<Layer *> layers_;
+    vector<Primitive *> net_;
     size_t batch_size_;
     size_t channel_;
     size_t height_;
     size_t width_;
-    std::vector<void *> data_tensors_;
-    std::vector<void *> gradient_tensors_;
+    vector<void *> data_tensors_;
+    vector<void *> gradient_tensors_;
 };
 #endif // SEQUENTIAL_NETWORK_H

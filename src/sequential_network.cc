@@ -12,6 +12,9 @@ SequentialNetwork::~SequentialNetwork() {
     for (auto r : gradient_tensors_) {
         dnnReleaseBuffer_F32(r);
     }
+    for (auto p : net_) {
+        delete p;
+    }
 }
 int SequentialNetwork::add_layer(Layer *l) {
     int id = layers_.size();
@@ -23,13 +26,13 @@ void SequentialNetwork::finalize_layers() {
     // it will be set by train
     data_tensors_.push_back(nullptr);
     gradient_tensors_.push_back(nullptr);
-    std::vector<size_t> input_dimensions;
+    vector<size_t> input_dimensions;
     input_dimensions.push_back(width_);
     input_dimensions.push_back(height_);
     input_dimensions.push_back(channel_);
     input_dimensions.push_back(batch_size_);
     for (int i = 0; i < layers_.size(); i++) {
-        std::vector<size_t> output_dimensions;
+        vector<size_t> output_dimensions;
         // each time a primitive is contructed,
         // it requires the input tensor dimensions
         // it gives back the output tensor dimensions,
@@ -68,18 +71,27 @@ void SequentialNetwork::finalize_layers() {
         net_[i]->initialize(&init);
     }
 }
-void SequentialNetwork::train(void *X, void *y, Optimizer *o) {
-    data_tensors_[0] = X;
+void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer *o) {
+    SoftMaxObjective obj;
     for (int i = 0; i < 1000; i++) {
-        forward();
+        forward(X+i*channel_*height_*width_);
+        getLoss(&obj, truth);
         backward();
         update(o, 0.001f);
     }
 }
-void SequentialNetwork::forward() {
+void SequentialNetwork::forward(void *X) {
+    data_tensors_[0] = X;
     for (auto &layer : net_) {
         layer->forward();
     }
+}
+float SequentialNetwork::getLoss(SoftMaxObjective *obj, vector<size_t> const &truth) {
+    return obj->computeLossAndGradient(batch_size_,
+                                       truth.size(),
+                                       (float *) data_tensors_[data_tensors_.size()-1],
+                                       truth,
+                                       (float *) gradient_tensors_[gradient_tensors_.size()-1]);
 }
 void SequentialNetwork::backward() {
     for (auto &layer : net_) {
