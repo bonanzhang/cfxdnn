@@ -1,14 +1,14 @@
 #include "primitive.h"
 
-Primitive::Primitive(Layer* l, std::vector<size_t> const &src_dimensions, std::vector<size_t> &dst_dimensions) {
+Primitive::Primitive(Layer const *l, std::vector<size_t> const &src_dimensions, std::vector<size_t> &dst_dimensions) {
   // Initializing resource pointers to null (needed for the update() to work) 
   for(int i = 0; i < dnnResourceNumber; i++) {
     resources[i] = NULL;
   }  
 
   // Initializing the primitives vector;
-  size_t numberOfFwdPrimitives = l->getNumberOfFwdPrimitives();
-  size_t numberOfBwdPrimitives = l->getNumberOfBwdPrimitives();
+  size_t const numberOfFwdPrimitives = l->getNumberOfFwdPrimitives();
+  size_t const numberOfBwdPrimitives = l->getNumberOfBwdPrimitives();
 
   forward_p = std::vector<dnnPrimitive_t>(numberOfFwdPrimitives, dnnPrimitive_t());
   backward_p = std::vector<dnnPrimitive_t>(numberOfBwdPrimitives, dnnPrimitive_t());
@@ -71,37 +71,37 @@ void Primitive::backward() {
   }
 }
 
-void Primitive::update(Optimizer* opt, float learning_rate) {
+void Primitive::update(Optimizer *opt, float learning_rate) {
   if(resources[dnnResourceFilter] && resources[dnnResourceDiffFilter]) {
-    opt->applyOptimization((float*) resources[dnnResourceFilter], 
-                           (float*) resources[dnnResourceDiffFilter],
+    opt->applyOptimization((float *) resources[dnnResourceFilter], 
+                           (float *) resources[dnnResourceDiffFilter],
                            resource_sizes[dnnResourceFilter],
                            learning_rate);
   }
   if(resources[dnnResourceBias] && resources[dnnResourceDiffBias]) {
-    opt->applyOptimization((float*) resources[dnnResourceBias], 
-                           (float*) resources[dnnResourceDiffBias],
+    opt->applyOptimization((float *) resources[dnnResourceBias], 
+                           (float *) resources[dnnResourceDiffBias],
                            resource_sizes[dnnResourceBias],
                            learning_rate);
   }
 }
 
-void Primitive::setFwdInput(void* src) {
+void Primitive::setFwdInput(void *src) {
   resources[dnnResourceSrc] = src;
 }
 
-void Primitive::setFwdOutput(void* dst) {
+void Primitive::setFwdOutput(void *dst) {
   resources[dnnResourceDst] = dst;
 }
 
-void Primitive::setBwdInput(void* diffdst) {
+void Primitive::setBwdInput(void *diffdst) {
   resources[dnnResourceDiffDst] = diffdst;
 }
 
-void Primitive::setBwdOutput(void* diffsrc) {
+void Primitive::setBwdOutput(void *diffsrc) {
   resources[dnnResourceDiffSrc] = diffsrc;
 }
 
-void* Primitive::getResource(dnnResourceType_t type) {
+void * Primitive::getResource(dnnResourceType_t type) {
   return resources[type];
 }

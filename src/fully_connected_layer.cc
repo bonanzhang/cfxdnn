@@ -9,7 +9,7 @@ void FullyConnectedLayer::createPrimitives(std::vector<size_t> const &src_dimens
                                  std::vector<dnnPrimitive_t> &bwd_p,
                                  std::vector<std::vector<dnnResourceType_t>> &requested_fwd_resources,
                                  std::vector<std::vector<dnnResourceType_t>> &requested_bwd_resources) {
-  const size_t dimension = src_dimensions.size();
+  size_t const dimension = src_dimensions.size();
   /* TODO: if(dimension != 4) { do something } */
   // Computing Dimensions. FullyConnected does not change size. 
   dst_dimensions.push_back(src_dimensions[0]); 

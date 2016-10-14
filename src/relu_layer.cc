@@ -30,6 +30,8 @@ void ReLULayer::createPrimitives(std::vector<size_t> const &src_dimensions,
     dst_stride *= dst_dimensions[i]; 
   }
 
+  // Creating ReLU primitive. Link to MKL page on ReLU primitive:
+  // https://software.intel.com/en-us/node/684774
   // Creating Layouts needed for primitives
   dnnLayout_t src_layout;
   dnnLayoutCreate_F32(&src_layout, dimension, src_dimensions_, src_strides_);
@@ -45,11 +47,11 @@ void ReLULayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   // No Requested Resource for ReLU
 }
 
-size_t getNumberOfFwdPrimitives() {
+size_t ReLULayer::getNumberOfFwdPrimitives() {
   // ReLU has one forward primitive
   return 1;
 }
-size_t getNumberOfBwdPrimitives() {
+size_t ReLULayer::getNumberOfBwdPrimitives() {
   // ReLU has one backward primitive
   return 1;
 } 
