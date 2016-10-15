@@ -42,7 +42,6 @@ void ReLULayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   // Deleting the Layouts
   dnnLayoutDelete_F32(dst_layout);
   dnnLayoutDelete_F32(src_layout);
-
   // No Requested Resource for ReLU
 }
 

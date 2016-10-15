@@ -48,14 +48,11 @@ void SequentialNetwork::finalize_layers() {
         // the data and the gradient tensors have the same dimensions
         // this is WHCN
         size_t const dim = output_dimensions.size();
-        std::cout << dim << std::endl;
         size_t sizes[dim];
-        for (int i = 0; i < dim; i++) {
-            sizes[i] = output_dimensions[i];
-        }
         size_t str = 1;
         size_t strides[dim];
         for (int i = 0; i < dim; i++) {
+            sizes[i]=output_dimensions[i];
             strides[i] = str;
             str *= sizes[i];
         }
@@ -74,8 +71,8 @@ void SequentialNetwork::finalize_layers() {
     for (int i = 0; i < net_.size(); i++) {
         net_[i]->setFwdInput(data_tensors_[i]);
         net_[i]->setFwdOutput(data_tensors_[i+1]);
-        net_[i]->setBwdInput(gradient_tensors_[i]);
-        net_[i]->setBwdOutput(gradient_tensors_[i+1]);
+        net_[i]->setBwdInput(gradient_tensors_[i+1]);
+        net_[i]->setBwdOutput(gradient_tensors_[i]);
     }
     // initialize each primitive's weights
     Initializer init;
@@ -94,13 +91,14 @@ void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer *o
 }
 void SequentialNetwork::forward(void *X) {
     data_tensors_[0] = X;
+    net_[0]->setFwdInput(X);
     for (auto &layer : net_) {
         layer->forward();
     }
 }
 float SequentialNetwork::getLoss(SoftMaxObjective *obj, vector<size_t> const &truth) {
     return obj->computeLossAndGradient(batch_size_,
-                                       truth.size(),
+                                       classes_,
                                        (float *) data_tensors_[data_tensors_.size()-1],
                                        truth,
                                        (float *) gradient_tensors_[gradient_tensors_.size()-1]);
@@ -112,6 +110,6 @@ void SequentialNetwork::backward() {
 }
 void SequentialNetwork::update(Optimizer *opt, float learning_rate) {
     for (auto &layer : net_) {
-        layer->update(opt, 0.001f);
+        layer->update(opt, learning_rate);
     }
 }

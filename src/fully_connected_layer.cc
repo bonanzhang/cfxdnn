@@ -13,13 +13,7 @@ void FullyConnectedLayer::createPrimitives(std::vector<size_t> const &src_dimens
   /* TODO: if(dimension != 4) { do something } */
   // Computing Dimensions. FullyConnected does not change size. 
   dst_dimensions.push_back(src_dimensions[0]); 
-
-  size_t collapsed_size = 1;
-  for(int i = 1; i < dimension; i++) {
-    collapsed_size *= src_dimensions[i];
-  }; 
-
-  dst_dimensions.push_back(collapsed_size);
+  dst_dimensions.push_back(output_channels_);
  
   // Making a copy of input and output dims because the primitive
   // needs size_t*. 
@@ -27,7 +21,6 @@ void FullyConnectedLayer::createPrimitives(std::vector<size_t> const &src_dimens
   for(int i = 0; i < dimension; i++) { 
     src_dimensions_[i] = src_dimensions[i]; 
   }
-  size_t dst_dimensions_[2] = {src_dimensions[0], collapsed_size};
 
   // Creating the Primitives
   if(bias_) {  // With bias
