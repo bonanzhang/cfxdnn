@@ -25,6 +25,6 @@ int main() {
     float loss = net.getLoss(&obj, ground_truth);
     std::cout << loss << std::endl;
     net.backward();
-    net.update(&sgd, -0.1f);
+    net.update(&sgd, 0.001f);
   }
 }

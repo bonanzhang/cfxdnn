@@ -5,15 +5,18 @@ float SoftMaxObjective::computeLossAndGradient(size_t const batch_size, size_t c
   // classes to support both vectorization and multi-threading
   for(int i = 0; i < batch_size; i++) {
     float sum = 0.0f, max_val = 0.0f;
+#pragma omp simd
     for(int j = 0; j < n_classes; j++) {
       max_val = (max_val > src[i*n_classes*j]) ? max_val : src[i*n_classes*j]; 
     }
+#pragma omp simd
     for(int j = 0; j < n_classes; j++) {
       float const score=expf(src[i*n_classes*j]-max_val); 
       diffsrc[i*n_classes*j] = score;
       sum += score; 
     }
     float norm = 1.0f/sum;
+#pragma omp simd
     for(int j = 0; j < n_classes; j++) { 
       diffsrc[i*n_classes*j] *= norm;
     }
