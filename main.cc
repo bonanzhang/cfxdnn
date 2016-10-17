@@ -4,9 +4,9 @@
 #include <cfxdnn.h>
 int main() {
   size_t const batch_size = 10;
-  size_t const input_c= 1;
-  size_t const input_h = 10;
-  size_t const input_w = 10;
+  size_t const input_c= 3;
+  size_t const input_h = 224;
+  size_t const input_w = 224;
   float *inputData = (float *) malloc(sizeof(float)*batch_size*input_c*input_h*input_w);
   srand(0);
   for(int i = 0; i < batch_size*input_c*input_h*input_w; i++) inputData[i] = ((float)rand())/((float) RAND_MAX)-0.5;
@@ -20,11 +20,11 @@ int main() {
   net.finalize_layers();
   std::cout << "start" << std::endl;
   
-  for(int i = 0; i < 10; i++) {
+  for(int i = 0; i < 100; i++) {
     net.forward(inputData);
     float loss = net.getLoss(&obj, ground_truth);
     std::cout << loss << std::endl;
     net.backward();
-    net.update(&sgd, -0.1f);
+    net.update(&sgd, 0.00001f);
   }
 }
