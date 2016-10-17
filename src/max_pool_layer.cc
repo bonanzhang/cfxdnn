@@ -45,9 +45,9 @@ void MaxPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   size_t src_stride=1,dst_stride=1;
   for(int i = 0; i < dimension; i++) { 
     src_strides_[i] = src_stride;
-    src_stride = src_dimensions[i]; 
+    src_stride *= src_dimensions[i]; 
     dst_strides_[i] = dst_stride;
-    dst_stride = dst_dimensions[i]; 
+    dst_stride *= dst_dimensions[i]; 
   }
 
   size_t kernel_size_[2]   = {kernel_h_, kernel_w_};
