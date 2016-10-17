@@ -31,8 +31,8 @@ void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimension
   // TODO: Check dimensions
   // Computing Dimensions. Convolution does not change size. 
 
-  size_t dst_h = std::ceil(((float) (src_dimensions[0]-kernel_h_+2*padding_h_))/stride_h_)+1;
-  size_t dst_w = std::ceil(((float) (src_dimensions[1]-kernel_w_+2*padding_w_))/stride_w_)+1;
+  size_t dst_w = std::ceil(((float) (src_dimensions[0]-kernel_w_+2*padding_w_))/stride_w_)+1;
+  size_t dst_h = std::ceil(((float) (src_dimensions[1]-kernel_h_+2*padding_h_))/stride_h_)+1;
   dst_dimensions.push_back(dst_w); 
   dst_dimensions.push_back(dst_h); 
   dst_dimensions.push_back(output_c_); 
@@ -45,9 +45,9 @@ void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimension
     dst_dimensions_[i] = dst_dimensions[i]; 
   }
 
-  size_t kernel_size_[2]   = {kernel_h_, kernel_w_};
-  size_t kernel_stride_[2] = {stride_h_, stride_w_};
-  int input_offset_[2]  = {-padding_h_, -padding_w_};
+  size_t kernel_size_[2]   = {kernel_w_, kernel_h_};
+  size_t kernel_stride_[2] = {stride_w_, stride_h_};
+  int input_offset_[2]  = {-padding_w_, -padding_h_};
  
 
   // Creating Convolution primitive. Link to MKL page on convolution primitive:
@@ -86,4 +86,7 @@ size_t ConvolutionLayer::getNumberOfBwdPrimitives() {
   // Convolution has two or three backward primitive
   return (bias_) ? 3 : 2;
 } 
+bool ConvlutionLayer::needsPadding() {
+  return true;
+}
 

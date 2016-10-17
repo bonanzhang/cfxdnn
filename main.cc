@@ -34,11 +34,12 @@ int main() {
   net.finalize_layers();
   std::cout << "start" << std::endl;
   
-  for(int i = 0; i < 100; i++) {
+  for(int i = 0; i < 5; i++) {
     net.forward(inputData);
-    //float loss = 0.0f; //net.getLoss(&obj, ground_truth);
-    //std::cout << loss << std::endl;
+    float loss = net.getLoss(&obj, ground_truth);
+    std::cout << loss << std::endl;
     //net.backward();
     //inet.update(&sgd, 0.00001f);
   }
+  std::cout << "Done" << std::endl;
 }

@@ -73,7 +73,6 @@ void MaxPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   
   // Requested Resource for MaxPool
   requested_fwd_resources[0].push_back(dnnResourceWorkspace);
-  // bkd also requires workspace, but no need to allocate twice
 }
 
 size_t MaxPoolLayer::getNumberOfFwdPrimitives() {

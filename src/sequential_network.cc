@@ -43,7 +43,10 @@ void SequentialNetwork::finalize_layers() {
         // it requires the input tensor dimensions
         // it gives back the output tensor dimensions,
         // which is used by the next layer as the input
-        net_.push_back(new Primitive(layers_[i], input_dimensions, output_dimensions));
+        if (layers_[i]->needsPadding) {
+            net_.push_back(new PaddingLayer(input_dimensions, padded_dims));
+        }
+        net_.push_back(new Primitive(layers_[i], padded_dims, output_dimensions));
         input_dimensions = output_dimensions;
         // the tensor resources are allocated here
         // the data and the gradient tensors have the same dimensions
@@ -53,10 +56,10 @@ void SequentialNetwork::finalize_layers() {
         size_t str = 1;
         size_t strides[dim];
 
-  std::cout << "odim " << i << ": ";
-  for(int i = 0; i < dim; i++)
-    std::cout << output_dimensions[i] << " ";
-  std::cout << std::endl;
+//  std::cout << "odim " << i << ": ";
+//  for(int i = 0; i < dim; i++)
+//    std::cout << output_dimensions[i] << " ";
+//  std::cout << std::endl;
         for (int i = 0; i < dim; i++) {
             sizes[i]=output_dimensions[i];
             strides[i] = str;
@@ -99,9 +102,13 @@ void SequentialNetwork::forward(void *X) {
     data_tensors_[0] = X;
     net_[0]->setFwdInput(X);
     int count = 0;
+    std::cout << "DATA: " << ((float *)data_tensors_[count])[0] << std::endl;
     for (auto &layer : net_) {
-        std::cout << "Layer Forward: " << count << std::endl;
         layer->forward();
+        std::cout << "DATA: " << ((float *)data_tensors_[count+1])[0] << std::endl;
+        std::cout << "DATA2: " << ((float *)layer->getResource(dnnResourceDst))[0] << std::endl;
+        if(layer->getResource(dnnResourceFilter))
+        std::cout << "WEIGHT: " << ((float *)layer->getResource(dnnResourceFilter))[0] << std::endl;
         count++;
     }
 }
