@@ -1,6 +1,6 @@
 #ifndef LAYER_H
 #define LAYER_H
-#include "mkl.h"
+#include "mkl_dnn.h"
 #include <vector>
 class Layer {
 public:
