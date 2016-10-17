@@ -19,7 +19,7 @@
 // All functions here are safe to call by derived classes.
 // If it is not applicable (e.g. update() on ReLU) it will
 // simply do nothing.
-class Primitive : public NetComponents{
+class Primitive : public NetComponents {
   public:
     Primitive(Layer *l,
               std::vector<size_t> const &input_dimensions,

@@ -53,6 +53,6 @@ size_t ReLULayer::getNumberOfBwdPrimitives() {
   // ReLU has one backward primitive
   return 1;
 } 
-bool ReLULayer::needsPadding() {
+bool ReLULayer::needsPadding(std::vector<size_t> &padding_size) {
   return false;
 }

@@ -43,10 +43,18 @@ void SequentialNetwork::finalize_layers() {
         // it requires the input tensor dimensions
         // it gives back the output tensor dimensions,
         // which is used by the next layer as the input
-        if (layers_[i]->needsPadding) {
-            net_.push_back(new PaddingLayer(input_dimensions, padded_dims));
+        // the current convolution primitive used needs a padding layer
+        // but this is going to be a transparent layer from the users
+        // the users already did all the work they need to do
+        // by specifying the padding sizes
+        std::vector<size_t> padding_size;
+        std::vector<size_t> padded_dimensions;
+        if (layers_[i]->needsPadding(padding_size)) {
+            // TODO: that false means not unpadding for back prop
+            // make sure that's always true
+            net_.push_back(new Padder(input_dimensions, padding_size, padded_dimensions, false));
         }
-        net_.push_back(new Primitive(layers_[i], padded_dims, output_dimensions));
+        net_.push_back(new Primitive(layers_[i], padded_dimensions, output_dimensions));
         input_dimensions = output_dimensions;
         // the tensor resources are allocated here
         // the data and the gradient tensors have the same dimensions
@@ -56,10 +64,6 @@ void SequentialNetwork::finalize_layers() {
         size_t str = 1;
         size_t strides[dim];
 
-//  std::cout << "odim " << i << ": ";
-//  for(int i = 0; i < dim; i++)
-//    std::cout << output_dimensions[i] << " ";
-//  std::cout << std::endl;
         for (int i = 0; i < dim; i++) {
             sizes[i]=output_dimensions[i];
             strides[i] = str;
