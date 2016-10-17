@@ -83,7 +83,7 @@ void SequentialNetwork::finalize_layers() {
 void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer *o) {
     SoftMaxObjective obj;
     for (int i = 0; i < 1000; i++) {
-        forward(X+i*channel_*height_*width_);
+        forward(((float *) X) + i*channel_*height_*width_);
         getLoss(&obj, truth);
         backward();
         update(o, 0.001f);
