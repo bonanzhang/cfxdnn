@@ -1,7 +1,7 @@
 #ifndef PRIMITIVE_H
 #define PRIMITIVE_H
-#include <mkl.h>
 #include <vector>
+#include "mkl_dnn.h"
 #include "optimizer.h"
 #include "initializer.h"
 #include "layer.h"
