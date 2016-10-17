@@ -19,7 +19,8 @@ Primitive::Primitive(Layer *l, std::vector<size_t> const &src_dimensions, std::v
   for(int i = 0; i < requested_fwd_resources.size(); i++) {
     for(int j = 0; j < requested_fwd_resources[i].size(); j++) {
       dnnLayout_t pLayout;
-      dnnLayoutCreateFromPrimitive_F32(&pLayout, forward_p[i], requested_fwd_resources[i][j]);
+      int e = dnnLayoutCreateFromPrimitive_F32(&pLayout, forward_p[i], requested_fwd_resources[i][j]);
+      //TODO: errors when layour does not work;
       if(pLayout) { 
         dnnAllocateBuffer_F32(&resources[requested_fwd_resources[i][j]], pLayout);
         resource_sizes[requested_fwd_resources[i][j]] = dnnLayoutGetMemorySize_F32(pLayout)/sizeof(float);

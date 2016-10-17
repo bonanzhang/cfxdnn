@@ -1,4 +1,5 @@
 #include "fully_connected_layer.h"
+#include <iostream>
 FullyConnectedLayer::FullyConnectedLayer(size_t output_channels, bool bias) {
   output_channels_ = output_channels;
   bias_ = bias;
@@ -10,10 +11,9 @@ void FullyConnectedLayer::createPrimitives(std::vector<size_t> const &src_dimens
                                  std::vector<std::vector<dnnResourceType_t>> &requested_fwd_resources,
                                  std::vector<std::vector<dnnResourceType_t>> &requested_bwd_resources) {
   size_t const dimension = src_dimensions.size();
-  /* TODO: if(dimension != 4) { do something } */
   // Computing Dimensions. FullyConnected does not change size. 
-  dst_dimensions.push_back(src_dimensions[0]); 
   dst_dimensions.push_back(output_channels_);
+  dst_dimensions.push_back(src_dimensions[dimension-1]); 
  
   // Making a copy of input and output dims because the primitive
   // needs size_t*. 
