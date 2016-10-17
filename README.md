@@ -1,4 +1,14 @@
 C++ wrapper for the MKLDNN primitives.
+pre-requisites:
+MKL DNN primitives: available in the free community edition (maybe, TODO, check if true)
+cmake
+CXX of some kind (that supports openmp maybe)
+
+build instructions:
+mkdir build
+cd build
+CXX=g++ cmake ..
+make -j
 
 Net - Container for layers. The user should only have to call fwd(), bkd() and update() member functions of this class. Currently only sequencial networks. 
   - potentiallly graph and sequential supports
