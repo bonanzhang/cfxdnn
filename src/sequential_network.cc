@@ -1,4 +1,5 @@
 #include "sequential_network.h"
+#include <iostream>
 SequentialNetwork::SequentialNetwork(size_t batch_size, 
                                      size_t channel, 
                                      size_t height, 
@@ -51,6 +52,11 @@ void SequentialNetwork::finalize_layers() {
         size_t sizes[dim];
         size_t str = 1;
         size_t strides[dim];
+
+  std::cout << "odim " << i << ": ";
+  for(int i = 0; i < dim; i++)
+    std::cout << output_dimensions[i] << " ";
+  std::cout << std::endl;
         for (int i = 0; i < dim; i++) {
             sizes[i]=output_dimensions[i];
             strides[i] = str;
@@ -92,8 +98,11 @@ void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer *o
 void SequentialNetwork::forward(void *X) {
     data_tensors_[0] = X;
     net_[0]->setFwdInput(X);
+    int count = 0;
     for (auto &layer : net_) {
+        std::cout << "Layer Forward: " << count << std::endl;
         layer->forward();
+        count++;
     }
 }
 float SequentialNetwork::getLoss(SoftMaxObjective *obj, vector<size_t> const &truth) {
