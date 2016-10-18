@@ -1,6 +1,8 @@
 #include "padder.h"
 Padder::Padder(std::vector<size_t> const &src_dimensions, std::vector<size_t> const &padding_size, std::vector<size_t> &dst_dimensions , bool unpad_backwards=false) {
-  
+  const int dimension = src_dimensions.size();
+  const int pad_dimension = padding_size.size();
+  // TODO: check that dimension is 4 and padding is 2
   src_dimensions_ = src_dimensions;
   padding_size_ = padding_size;
   unpad_backwards_ = unpad_backwards;
@@ -12,11 +14,28 @@ Padder::Padder(std::vector<size_t> const &src_dimensions, std::vector<size_t> co
 }
     // Forward Propagation for this layer.
 void Padder::forward() {
-
+  const int ldd = src_dimensions[0]+2*padding_size[0];
+  const int col_pad = padding_size[1];
+  const int row_pad = padding_size[0];
+  for(int i = 0; i < src_dimensions[1]; i++) {
+    for(int j = 0; j < src_dimensions[0]; j++) {
+      dst[(i+col_pad)*ldd+(j+row_pad)] = src_[i*src_dimensions[0]]; 
+    }
+  } 
 }
 // Backward Propagation for this layer.
 void Padder::backward() {
-
+  if(unpad_backwards_) {
+  const int ldd = src_dimensions[0]+2*padding_size[0];
+  const int col_pad = padding_size[1];
+  const int row_pad = padding_size[0];
+  for(int i = 0; i < src_dimensions[1]; i++) {
+    for(int j = 0; j < src_dimensions[0]; j++) {
+      src_[i*src_dimensions[0]] = dst[(i+col_pad)*ldd+(j+row_pad)]; 
+    }
+  } 
+  }
+//TODO implements backwards
 } 
 // Updates weights of the layer based on the gradients.
 void Padder::update(Optimizer* opt, float learning_rate) {
@@ -33,6 +52,12 @@ void Padder::setFwdInput(void* src) {
 }
 void Padder::setFwdOutput(void* dst) {
   dst_ = (float *) dst;
+  // Initialize it to 0 so this does not happen at every call to forward.
+  for(int i = 0; i < dst_dimensions[1]+2*padding_size[1]; i++) {
+    for(int j = 0; j < dst_dimensions[0]+2*padding_size[0]; j++) {
+      dst_[i][j] = 0.0f;
+    }
+  } 
 }
 void Padder::setBwdInput(void* diffdst) {
   diffdst_ = (float *) diffdst;
