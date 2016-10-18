@@ -37,6 +37,7 @@ void SequentialNetwork::finalize_layers() {
     input_dimensions.push_back(height_);
     input_dimensions.push_back(channel_);
     input_dimensions.push_back(batch_size_);
+    int component_index = 0;
     for (int i = 0; i < layers_.size(); i++) {
         std::cout << "finalizing layer " << i << std::endl;
         vector<size_t> output_dimensions;
@@ -53,10 +54,48 @@ void SequentialNetwork::finalize_layers() {
         if (layers_[i]->needsPadding(padding_size)) {
             // TODO: that false means not unpadding for back prop
             // make sure that's always true
+            // construct the padder and allocate its buffers
             net_.push_back(new Padder(input_dimensions, padding_size, padded_dimensions, false));
+            std::cout << "added component " << component_index++ << std::endl;
+            for (auto const d : input_dimensions) std::cout << d << " ";
+            std::cout << " >> ";
+            for (auto const d : padded_dimensions) std::cout << d << " ";
+            std::cout << std::endl;
+            // calculate the buffer sizes
+            size_t const pad_dim = padded_dimensions.size();
+            size_t pad_sizes[pad_dim];
+            size_t pad_str = 1;
+            size_t pad_strides[pad_dim];
+            for (int d = 0; d < pad_dim; d++) {
+                pad_sizes[d] = padded_dimensions[d];
+                pad_strides[d] = pad_str;
+                pad_str *= pad_sizes[d];
+            }
+            // allocate the buffers
+            dnnLayout_t pad_layout;
+            dnnLayoutCreate_F32(&pad_layout, pad_dim, pad_sizes, pad_strides);
+            void *pad_data;
+            void *pad_gradient;
+            dnnAllocateBuffer_F32(&pad_data, pad_layout);
+            dnnAllocateBuffer_F32(&pad_gradient, pad_layout);
+            dnnLayoutDelete_F32(pad_layout);
+            // store the pointers to the buffers
+            data_tensors_.push_back(pad_data);
+            gradient_tensors_.push_back(pad_gradient);
+            //construct the acutal primitive
             net_.push_back(new Primitive(layers_[i], padded_dimensions, output_dimensions));
+            std::cout << "added component " << component_index++ << std::endl;
+            for (auto const d : padded_dimensions) std::cout << d << " ";
+            std::cout << " >> ";
+            for (auto const d : output_dimensions) std::cout << d << " ";
+            std::cout << std::endl;
         } else {
             net_.push_back(new Primitive(layers_[i], input_dimensions, output_dimensions));
+            std::cout << "added component " << component_index++ << std::endl;
+            for (auto const d : input_dimensions) std::cout << d << " ";
+            std::cout << " >> ";
+            for (auto const d : output_dimensions) std::cout << d << " ";
+            std::cout << std::endl;
         }
         input_dimensions = output_dimensions;
         // the tensor resources are allocated here
@@ -66,11 +105,10 @@ void SequentialNetwork::finalize_layers() {
         size_t sizes[dim];
         size_t str = 1;
         size_t strides[dim];
-
-        for (int i = 0; i < dim; i++) {
-            sizes[i]=output_dimensions[i];
-            strides[i] = str;
-            str *= sizes[i];
+        for (int d = 0; d < dim; d++) {
+            sizes[d]=output_dimensions[d];
+            strides[d] = str;
+            str *= sizes[d];
         }
         dnnLayout_t layout;
         dnnLayoutCreate_F32(&layout, dim, sizes, strides);
@@ -110,8 +148,9 @@ void SequentialNetwork::forward(void *X) {
     net_[0]->setFwdInput(X);
     std::cout << "forward pass for all " << net_.size() << " net components" << std::endl;
     for (int i = 0; i < net_.size(); i++) {
-        std::cout << "forward pass for net components: " << i << std::endl;
+        std::cout << "net components: " << i << "...";
         net_[i]->forward();
+        std::cout << "done" << std::endl;
     }
 }
 float SequentialNetwork::getLoss(SoftMaxObjective *obj, vector<size_t> const &truth) {

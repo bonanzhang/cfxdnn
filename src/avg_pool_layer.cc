@@ -1,4 +1,5 @@
 #include "avg_pool_layer.h"
+#include <iostream>
 AvgPoolLayer::AvgPoolLayer(size_t kernel_w,
                             size_t kernel_h,
                             size_t stride_w,
@@ -22,7 +23,7 @@ void AvgPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
                                  std::vector<std::vector<dnnResourceType_t>> &requested_fwd_resources,
                                  std::vector<std::vector<dnnResourceType_t>> &requested_bwd_resources) {
 
-  const size_t dimension = src_dimensions.size();
+  size_t const dimension = src_dimensions.size();
   // TODO: Check dimensions
   // Computing Dimensions. AvgPool does not change size. 
 
@@ -65,6 +66,18 @@ void AvgPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
 
   // Creating the Primitives. Only one needed for each for AvgPool
   dnnPoolingCreateForward_F32(&fwd_p[0], NULL, dnnAlgorithmPoolingAvg, src_layout, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
+
+  //size debug
+  dnnLayout_t avg_fwd_in_layout;
+  dnnLayoutCreateFromPrimitive_F32(&avg_fwd_in_layout, fwd_p[0], dnnResourceSrc);
+  dnnLayout_t avg_fwd_out_layout;
+  dnnLayoutCreateFromPrimitive_F32(&avg_fwd_out_layout, fwd_p[0], dnnResourceDst);
+  size_t avg_fwd_in_buf_size = dnnLayoutGetMemorySize_F32(avg_fwd_in_layout);
+  size_t avg_fwd_out_buf_size = dnnLayoutGetMemorySize_F32(avg_fwd_out_layout);
+  std::cout << "average pool forward buffer sizes " 
+            << avg_fwd_in_buf_size << " >> "
+            << avg_fwd_out_buf_size << std::endl;
+
   dnnPoolingCreateBackward_F32(&bwd_p[0], NULL, dnnAlgorithmPoolingAvg, src_layout, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
   
   // Deleting the Layouts
