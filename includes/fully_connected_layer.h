@@ -24,6 +24,7 @@ public:
                         ); 
   size_t getNumberOfFwdPrimitives();
   size_t getNumberOfBwdPrimitives();
+  bool needsPadding(std::vector<size_t> &padding_size);
 private:
   size_t output_channels_;
   bool bias_;

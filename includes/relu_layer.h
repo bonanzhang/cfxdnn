@@ -19,6 +19,7 @@ public:
                         std::vector<std::vector<dnnResourceType_t>> &requested_bwd_resources);
   size_t getNumberOfFwdPrimitives();
   size_t getNumberOfBwdPrimitives();
+  bool needsPadding(std::vector<size_t> &padding_size);
 private:
   float negative_slope_;
 };

@@ -1,5 +1,5 @@
-#ifndef NET_COMPONENTS_H
-#define NET_COMPONENTS_H
+#ifndef NET_COMPONENT_H
+#define NET_COMPONENT_H
 #include "optimizer.h"
 #include "initializer.h"
 // Parent Class for all neural network layers. 
@@ -15,23 +15,23 @@
 // All functions here are safe to call by derived classes.
 // If it is not applicable (e.g. update() on ReLU) it will
 // simply do nothing.
-class NetComponents {
+class NetComponent {
   public:
     // Forward Propagation for this layer.
-    virtual void forward();
+    virtual void forward() = 0;
     // Backward Propagation for this layer.
-    virtual void backward(); 
+    virtual void backward() = 0; 
     // Updates weights of the layer based on the gradients.
-    virtual void update(Optimizer* opt, float learning_rate);
+    virtual void update(Optimizer* opt, float learning_rate) = 0;
     // Fills the primitive's weights, if applicable
-    virtual void initialize(Initializer *ini);
+    virtual void initialize(Initializer *ini) = 0;
     // "Connect" the layers in a neural network. This is done 
     // automatically by network objects (e.g. sequencial_network)
-    virtual void setFwdInput(void* src);
-    virtual void setFwdOutput(void* dst);
-    virtual void setBwdInput(void* diffdst);
-    virtual void setBwdOutput(void* diffsrc);
+    virtual void setFwdInput(void* src) = 0;
+    virtual void setFwdOutput(void* dst) = 0;
+    virtual void setBwdInput(void* diffdst) = 0;
+    virtual void setBwdOutput(void* diffsrc) = 0;
     // Get pointer to buffer (resource). Used to get, for 
     // example, the weights of a given layer
 };
-#endif // NET_COMPONENTS_H
+#endif // NET_COMPONENT_H

@@ -86,7 +86,8 @@ size_t ConvolutionLayer::getNumberOfBwdPrimitives() {
   // Convolution has two or three backward primitive
   return (bias_) ? 3 : 2;
 } 
-bool ConvlutionLayer::needsPadding() {
+bool ConvolutionLayer::needsPadding(std::vector<size_t> &padding_size) {
+  padding_size.push_back(padding_w_);
+  padding_size.push_back(padding_h_);
   return true;
 }
-

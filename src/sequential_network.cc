@@ -43,10 +43,18 @@ void SequentialNetwork::finalize_layers() {
         // it requires the input tensor dimensions
         // it gives back the output tensor dimensions,
         // which is used by the next layer as the input
-        if (layers_[i]->needsPadding) {
-            net_.push_back(new PaddingLayer(input_dimensions, padded_dims));
+        // the current convolution primitive used needs a padding layer
+        // but this is going to be a transparent layer from the users
+        // the users already did all the work they need to do
+        // by specifying the padding sizes
+        std::vector<size_t> padding_size;
+        std::vector<size_t> padded_dimensions;
+        if (layers_[i]->needsPadding(padding_size)) {
+            // TODO: that false means not unpadding for back prop
+            // make sure that's always true
+            net_.push_back(new Padder(input_dimensions, padding_size, padded_dimensions, false));
         }
-        net_.push_back(new Primitive(layers_[i], padded_dims, output_dimensions));
+        net_.push_back(new Primitive(layers_[i], padded_dimensions, output_dimensions));
         input_dimensions = output_dimensions;
         // the tensor resources are allocated here
         // the data and the gradient tensors have the same dimensions
@@ -56,10 +64,6 @@ void SequentialNetwork::finalize_layers() {
         size_t str = 1;
         size_t strides[dim];
 
-//  std::cout << "odim " << i << ": ";
-//  for(int i = 0; i < dim; i++)
-//    std::cout << output_dimensions[i] << " ";
-//  std::cout << std::endl;
         for (int i = 0; i < dim; i++) {
             sizes[i]=output_dimensions[i];
             strides[i] = str;
@@ -92,7 +96,7 @@ void SequentialNetwork::finalize_layers() {
 void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer *o) {
     SoftMaxObjective obj;
     for (int i = 0; i < 1000; i++) {
-        forward(X+i*channel_*height_*width_);
+        forward(((float *) X) + i*channel_*height_*width_);
         getLoss(&obj, truth);
         backward();
         update(o, 0.001f);
@@ -105,10 +109,6 @@ void SequentialNetwork::forward(void *X) {
     std::cout << "DATA: " << ((float *)data_tensors_[count])[0] << std::endl;
     for (auto &layer : net_) {
         layer->forward();
-        std::cout << "DATA: " << ((float *)data_tensors_[count+1])[0] << std::endl;
-        std::cout << "DATA2: " << ((float *)layer->getResource(dnnResourceDst))[0] << std::endl;
-        if(layer->getResource(dnnResourceFilter))
-        std::cout << "WEIGHT: " << ((float *)layer->getResource(dnnResourceFilter))[0] << std::endl;
         count++;
     }
 }

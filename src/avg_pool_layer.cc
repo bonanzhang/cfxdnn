@@ -84,4 +84,6 @@ size_t AvgPoolLayer::getNumberOfBwdPrimitives() {
   // AvgPool has one backward primitive
   return 1;
 } 
-
+bool AvgPoolLayer::needsPadding(std::vector<size_t> &padding_size) {
+  return false;
+}
