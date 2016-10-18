@@ -5,6 +5,7 @@
 #include "padder.h"
 #include "layer.h"
 #include "softmax_objective.h"
+#include <exception>
 // A container wrapper around the MKL DNN primitives
 // Each of the primitives is wrapped in a "Layer"
 // This is a collection of those layers

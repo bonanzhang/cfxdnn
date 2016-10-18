@@ -15,7 +15,6 @@ Padder::Padder(std::vector<size_t> const &src_dimensions, std::vector<size_t> co
 }
 // Forward Propagation for this layer.
 void Padder::forward() {
-  std::cout << "padding a buffer" << std::endl;
   const int ldd = src_dimensions_[0]+2*padding_size_[0];
   const int col_pad = padding_size_[1];
   const int row_pad = padding_size_[0];

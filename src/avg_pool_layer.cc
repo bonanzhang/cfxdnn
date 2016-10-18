@@ -26,14 +26,12 @@ void AvgPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   size_t const dimension = src_dimensions.size();
   // TODO: Check dimensions
   // Computing Dimensions. AvgPool does not change size. 
-
   size_t dst_w = std::ceil(((float) (src_dimensions[0]-kernel_w_+2*padding_w_))/stride_w_)+1;
   size_t dst_h = std::ceil(((float) (src_dimensions[1]-kernel_h_+2*padding_h_))/stride_h_)+1;
   dst_dimensions.push_back(dst_w); 
   dst_dimensions.push_back(dst_h); 
   dst_dimensions.push_back(src_dimensions[2]); 
   dst_dimensions.push_back(src_dimensions[3]); 
- 
   // Making a copy of input and output dims because the primitive
   // needs size_t*. Also computing the strides for layout
   size_t src_dimensions_[dimension], dst_dimensions_[dimension];
@@ -50,12 +48,9 @@ void AvgPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
     dst_strides_[i] = dst_stride;
     dst_stride *= dst_dimensions[i]; 
   }
-
   size_t kernel_size_[2]   = {kernel_h_, kernel_w_};
   size_t kernel_stride_[2] = {stride_h_, stride_w_};
   int input_offset_[2]  = {-padding_h_, -padding_w_};
- 
-
   // Creating AvgPooling primitive. Link to MKL page on Pooling primitive:
   // https://software.intel.com/en-us/node/684776
   // Creating Layouts needed
@@ -63,27 +58,12 @@ void AvgPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   dnnLayoutCreate_F32(&src_layout, dimension, src_dimensions_, src_strides_);
   dnnLayout_t dst_layout;
   dnnLayoutCreate_F32(&dst_layout, dimension, dst_dimensions_, dst_strides_);
-
   // Creating the Primitives. Only one needed for each for AvgPool
   dnnPoolingCreateForward_F32(&fwd_p[0], NULL, dnnAlgorithmPoolingAvg, src_layout, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
-
-  //size debug
-  dnnLayout_t avg_fwd_in_layout;
-  dnnLayoutCreateFromPrimitive_F32(&avg_fwd_in_layout, fwd_p[0], dnnResourceSrc);
-  dnnLayout_t avg_fwd_out_layout;
-  dnnLayoutCreateFromPrimitive_F32(&avg_fwd_out_layout, fwd_p[0], dnnResourceDst);
-  size_t avg_fwd_in_buf_size = dnnLayoutGetMemorySize_F32(avg_fwd_in_layout);
-  size_t avg_fwd_out_buf_size = dnnLayoutGetMemorySize_F32(avg_fwd_out_layout);
-  std::cout << "average pool forward buffer sizes " 
-            << avg_fwd_in_buf_size << " >> "
-            << avg_fwd_out_buf_size << std::endl;
-
   dnnPoolingCreateBackward_F32(&bwd_p[0], NULL, dnnAlgorithmPoolingAvg, src_layout, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
-  
   // Deleting the Layouts
   dnnLayoutDelete_F32(dst_layout);
   dnnLayoutDelete_F32(src_layout);
-  
   // Requested Resource for AvgPool
   requested_fwd_resources[0].push_back(dnnResourceWorkspace);
   // bkd also requires workspace, but no need to allocate twice

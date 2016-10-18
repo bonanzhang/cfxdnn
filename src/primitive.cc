@@ -3,7 +3,7 @@
 Primitive::Primitive(Layer *l, std::vector<size_t> const &src_dimensions, std::vector<size_t> &dst_dimensions) {
   // Initializing resource pointers to null (needed for the update() to work) 
   for(int i = 0; i < dnnResourceNumber; i++) {
-    resources[i] = NULL;
+    resources[i] = nullptr;
   }  
   // Initializing the primitives vector;
   size_t const numberOfFwdPrimitives = l->getNumberOfFwdPrimitives();
@@ -95,13 +95,17 @@ void Primitive::backward() {
   }
 }
 void Primitive::update(Optimizer *opt, float learning_rate) {
-  if (resources[dnnResourceFilter] && resources[dnnResourceDiffFilter]) {
+  std::cout << "updating..." << std::flush;
+  if (resources[dnnResourceFilter] != nullptr && resources[dnnResourceDiffFilter] != nullptr) {
+    std::cout << "filter" << std::flush;
     opt->applyOptimization((float *) resources[dnnResourceFilter], 
                            (float *) resources[dnnResourceDiffFilter],
                            resource_sizes[dnnResourceFilter],
                            learning_rate);
   }
-  if (resources[dnnResourceBias] && resources[dnnResourceDiffBias]) {
+  std::cout << "..." << std::flush;
+  if (resources[dnnResourceBias] != nullptr && resources[dnnResourceDiffBias] != nullptr) {
+    std::cout << "bias" << std::flush;
     opt->applyOptimization((float *) resources[dnnResourceBias], 
                            (float *) resources[dnnResourceDiffBias],
                            resource_sizes[dnnResourceBias],

@@ -39,7 +39,6 @@ void SequentialNetwork::finalize_layers() {
     input_dimensions.push_back(batch_size_);
     int component_index = 0;
     for (int i = 0; i < layers_.size(); i++) {
-        std::cout << "finalizing layer " << i << std::endl;
         vector<size_t> output_dimensions;
         // each time a primitive is contructed,
         // it requires the input tensor dimensions
@@ -150,7 +149,7 @@ void SequentialNetwork::forward(void *X) {
     for (int i = 0; i < net_.size(); i++) {
         std::cout << "net components: " << i << "...";
         net_[i]->forward();
-        std::cout << "done" << std::endl;
+        std::cout << "finished" << std::endl;
     }
 }
 float SequentialNetwork::getLoss(SoftMaxObjective *obj, vector<size_t> const &truth) {
@@ -161,12 +160,18 @@ float SequentialNetwork::getLoss(SoftMaxObjective *obj, vector<size_t> const &tr
                                        (float *) gradient_tensors_[gradient_tensors_.size()-1]);
 }
 void SequentialNetwork::backward() {
-    for (auto &layer : net_) {
-        layer->backward();
+    std::cout << "backard pass for all " << net_.size() << " net components" << std::endl;
+    for (int i = net_.size()-1; i >= 0; i--) {
+        std::cout << "net components: " << i << "...";
+        net_[i]->backward();
+        std::cout << "finished" << std::endl;
     }
 }
 void SequentialNetwork::update(Optimizer *opt, float learning_rate) {
-    for (auto &layer : net_) {
-        layer->update(opt, learning_rate);
+    std::cout << "update for all " << net_.size() << " net components" << std::endl;
+    for (int i = 0; i < net_.size(); i++) {
+        std::cout << "net components: " << i << "...";
+        net_[i]->update(opt, learning_rate);
+        std::cout << "finished" << std::endl;
     }
 }
