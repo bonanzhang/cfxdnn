@@ -34,10 +34,10 @@ class Padder : public NetComponent {
   private:
     std::vector<size_t> src_dimensions_;
     std::vector<size_t> padding_size_;
-    float* src_; 
-    float* dst_; 
-    float* diffsrc_; 
-    float* diffdst_; 
+    float *src_; 
+    float *dst_; 
+    float *diffsrc_; 
+    float *diffdst_; 
     bool unpad_backwards_;
 };
 #endif // PADDER_H

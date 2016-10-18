@@ -12,28 +12,28 @@ Padder::Padder(std::vector<size_t> const &src_dimensions, std::vector<size_t> co
     dst_dimensions[i] += 2 * padding_size[i];
   }
 }
-    // Forward Propagation for this layer.
+// Forward Propagation for this layer.
 void Padder::forward() {
-  const int ldd = src_dimensions[0]+2*padding_size[0];
-  const int col_pad = padding_size[1];
-  const int row_pad = padding_size[0];
-  for(int i = 0; i < src_dimensions[1]; i++) {
-    for(int j = 0; j < src_dimensions[0]; j++) {
-      dst[(i+col_pad)*ldd+(j+row_pad)] = src_[i*src_dimensions[0]]; 
+  const int ldd = src_dimensions_[0]+2*padding_size_[0];
+  const int col_pad = padding_size_[1];
+  const int row_pad = padding_size_[0];
+  for(int i = 0; i < src_dimensions_[1]; i++) {
+    for(int j = 0; j < src_dimensions_[0]; j++) {
+      dst_[(i+col_pad)*ldd+(j+row_pad)] = src_[i*src_dimensions_[0]]; 
     }
   } 
 }
 // Backward Propagation for this layer.
 void Padder::backward() {
   if(unpad_backwards_) {
-  const int ldd = src_dimensions[0]+2*padding_size[0];
-  const int col_pad = padding_size[1];
-  const int row_pad = padding_size[0];
-  for(int i = 0; i < src_dimensions[1]; i++) {
-    for(int j = 0; j < src_dimensions[0]; j++) {
-      src_[i*src_dimensions[0]] = dst[(i+col_pad)*ldd+(j+row_pad)]; 
-    }
-  } 
+    int const ldd = src_dimensions_[0]+2*padding_size_[0];
+    int const col_pad = padding_size_[1];
+    int const row_pad = padding_size_[0];
+    for(int i = 0; i < src_dimensions_[1]; i++) {
+      for(int j = 0; j < src_dimensions_[0]; j++) {
+        src_[i*src_dimensions_[0]] = dst_[(i+col_pad)*ldd+(j+row_pad)]; 
+      }
+    } 
   }
 //TODO implements backwards
 } 
@@ -53,11 +53,6 @@ void Padder::setFwdInput(void* src) {
 void Padder::setFwdOutput(void* dst) {
   dst_ = (float *) dst;
   // Initialize it to 0 so this does not happen at every call to forward.
-  for(int i = 0; i < dst_dimensions[1]+2*padding_size[1]; i++) {
-    for(int j = 0; j < dst_dimensions[0]+2*padding_size[0]; j++) {
-      dst_[i][j] = 0.0f;
-    }
-  } 
 }
 void Padder::setBwdInput(void* diffdst) {
   diffdst_ = (float *) diffdst;
