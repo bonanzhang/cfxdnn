@@ -25,7 +25,6 @@ Primitive::Primitive(Layer *l, std::vector<size_t> const &src_dimensions, std::v
       if(pLayout) { 
         dnnAllocateBuffer_F32(&resources[requested_fwd_resources[i][j]], pLayout);
         resource_sizes[requested_fwd_resources[i][j]] = dnnLayoutGetMemorySize_F32(pLayout)/sizeof(float);
-        std::cout << requested_fwd_resources[i][j] << " " << dnnLayoutGetMemorySize_F32(pLayout) << std::endl;
         dnnLayoutDelete_F32(pLayout);
       } // else {TODO}
     } 
@@ -49,28 +48,24 @@ Primitive::Primitive(Layer *l, std::vector<size_t> const &src_dimensions, std::v
   for(int i = 0; i < src_dimensions.size(); i++) {
     size*=src_dimensions[i];
   } 
-  std::cout << "Layer src:" << dnnLayoutGetMemorySize_F32(pLayout)/sizeof(float) << " " << size << std::endl;
 
   dnnLayoutCreateFromPrimitive_F32(&pLayout, forward_p[0], dnnResourceDst);
   size = 1;
   for(int i = 0; i < dst_dimensions.size(); i++) {
     size*=dst_dimensions[i];
   } 
-  std::cout << "Layer dst:" << dnnLayoutGetMemorySize_F32(pLayout)/sizeof(float) << " " << size << std::endl;
 
   dnnLayoutCreateFromPrimitive_F32(&pLayout, backward_p[0], dnnResourceDiffSrc);
   size = 1;
   for(int i = 0; i < src_dimensions.size(); i++) {
     size*=src_dimensions[i];
   } 
-  std::cout << "Layer diffsrc:" << dnnLayoutGetMemorySize_F32(pLayout)/sizeof(float) << " " << size << std::endl;
 
   dnnLayoutCreateFromPrimitive_F32(&pLayout, backward_p[0], dnnResourceDiffDst);
   size = 1;
   for(int i = 0; i < dst_dimensions.size(); i++) {
     size*=dst_dimensions[i];
   } 
-  std::cout << "Layer diffdst:" << dnnLayoutGetMemorySize_F32(pLayout)/sizeof(float) << " " << size << std::endl;
 }
 
 Primitive::~Primitive() {

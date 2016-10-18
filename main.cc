@@ -32,14 +32,19 @@ int main() {
   net.add_layer(new FullyConnectedLayer(10, false)); 
   std::cout << "Finalizing Layers" << std::endl;
   net.finalize_layers();
-  std::cout << "start" << std::endl;
+  std::cout << "Starting training" << std::endl;
   
   for(int i = 0; i < 5; i++) {
+    std::cout << "training iteration " << i << std::endl;
     net.forward(inputData);
+    std::cout << "forward pass complete" << std::endl;
     float loss = net.getLoss(&obj, ground_truth);
+    std::cout << "loss calculation complete" << std::endl;
     std::cout << loss << std::endl;
-    //net.backward();
-    //inet.update(&sgd, 0.00001f);
+    net.backward();
+    std::cout << "backward pass complete" << std::endl;
+    net.update(&sgd, 0.001f);
+    std::cout << "update complete" << std::endl;
   }
   std::cout << "Done" << std::endl;
 }

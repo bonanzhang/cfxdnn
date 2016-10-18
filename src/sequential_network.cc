@@ -38,6 +38,7 @@ void SequentialNetwork::finalize_layers() {
     input_dimensions.push_back(channel_);
     input_dimensions.push_back(batch_size_);
     for (int i = 0; i < layers_.size(); i++) {
+        std::cout << "finalizing layer " << i << std::endl;
         vector<size_t> output_dimensions;
         // each time a primitive is contructed,
         // it requires the input tensor dimensions
@@ -53,8 +54,10 @@ void SequentialNetwork::finalize_layers() {
             // TODO: that false means not unpadding for back prop
             // make sure that's always true
             net_.push_back(new Padder(input_dimensions, padding_size, padded_dimensions, false));
+            net_.push_back(new Primitive(layers_[i], padded_dimensions, output_dimensions));
+        } else {
+            net_.push_back(new Primitive(layers_[i], input_dimensions, output_dimensions));
         }
-        net_.push_back(new Primitive(layers_[i], padded_dimensions, output_dimensions));
         input_dimensions = output_dimensions;
         // the tensor resources are allocated here
         // the data and the gradient tensors have the same dimensions
@@ -105,11 +108,10 @@ void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer *o
 void SequentialNetwork::forward(void *X) {
     data_tensors_[0] = X;
     net_[0]->setFwdInput(X);
-    int count = 0;
-    std::cout << "DATA: " << ((float *)data_tensors_[count])[0] << std::endl;
-    for (auto &layer : net_) {
-        layer->forward();
-        count++;
+    std::cout << "forward pass for all " << net_.size() << " net components" << std::endl;
+    for (int i = 0; i < net_.size(); i++) {
+        std::cout << "forward pass for net components: " << i << std::endl;
+        net_[i]->forward();
     }
 }
 float SequentialNetwork::getLoss(SoftMaxObjective *obj, vector<size_t> const &truth) {

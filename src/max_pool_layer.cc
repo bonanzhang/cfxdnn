@@ -1,4 +1,5 @@
 #include "max_pool_layer.h"
+#include <iostream>
 MaxPoolLayer::MaxPoolLayer(size_t kernel_w,
                             size_t kernel_h,
                             size_t stride_w,
@@ -21,8 +22,8 @@ void MaxPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
                                  std::vector<dnnPrimitive_t> &bwd_p,
                                  std::vector<std::vector<dnnResourceType_t>> &requested_fwd_resources,
                                  std::vector<std::vector<dnnResourceType_t>> &requested_bwd_resources) {
-
-  const size_t dimension = src_dimensions.size();
+  dnnError_t e;
+  size_t const dimension = src_dimensions.size();
   // TODO: Check dimensions
   // Computing Dimensions. MaxPool does not change size. 
 
@@ -54,18 +55,21 @@ void MaxPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   size_t kernel_stride_[2] = {stride_h_, stride_w_};
   int input_offset_[2]  = {-padding_h_, -padding_w_};
  
-
   // Creating MaxPooling primitive. Link to MKL page on Pooling primitive:
   // https://software.intel.com/en-us/node/684776
   // Creating Layouts needed
   dnnLayout_t src_layout;
-  dnnLayoutCreate_F32(&src_layout, dimension, src_dimensions_, src_strides_);
+  e = dnnLayoutCreate_F32(&src_layout, dimension, src_dimensions_, src_strides_);
+  if (e != E_SUCCESS) std::cout << "src layout failed\n";
   dnnLayout_t dst_layout;
-  dnnLayoutCreate_F32(&dst_layout, dimension, dst_dimensions_, dst_strides_);
+  e = dnnLayoutCreate_F32(&dst_layout, dimension, dst_dimensions_, dst_strides_);
+  if (e != E_SUCCESS) std::cout << "dst layout failed\n";
 
   // Creating the Primitives. Only one needed for each for MaxPool
-  dnnPoolingCreateForward_F32(&fwd_p[0], NULL, dnnAlgorithmPoolingMax, src_layout, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
-  dnnPoolingCreateBackward_F32(&bwd_p[0], NULL, dnnAlgorithmPoolingMax, src_layout, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
+  e = dnnPoolingCreateForward_F32(&fwd_p[0], NULL, dnnAlgorithmPoolingMax, src_layout, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
+  if (e != E_SUCCESS) std::cout << "maxp forward failed\n";
+  e = dnnPoolingCreateBackward_F32(&bwd_p[0], NULL, dnnAlgorithmPoolingMax, src_layout, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
+  if (e != E_SUCCESS) std::cout << "maxp backward failed\n";
   
   // Deleting the Layouts
   dnnLayoutDelete_F32(dst_layout);

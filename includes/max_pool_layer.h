@@ -12,12 +12,13 @@ public:
                size_t padding_h
                );
   // input:
-  //   previous_destination_dimensions
+  //   src_dimensions
   // outputs:
-  //   destination_dimensions
+  //   dst_dimensions
   //   fwd_p, forward pass primitive
   //   bwd_p, forward pass primitive
-  //   requested_resources
+  //   requested_fwd_resources
+  //   requested_bwd_resources
   void createPrimitives(std::vector<size_t> const &src_dimensions,
                         std::vector<size_t> &dst_dimensions,
                         std::vector<dnnPrimitive_t> &fwd_p,

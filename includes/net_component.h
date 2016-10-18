@@ -2,19 +2,17 @@
 #define NET_COMPONENT_H
 #include "optimizer.h"
 #include "initializer.h"
-// Parent Class for all neural network layers. 
-// This class contains the information about the parameters
-// required toreconstruct the layer (e.g. kernel size for 
-// convolution), and also contains the data (such as filter 
-// weights) of the layers.
-
-// Generally the user should only have to create the layer
-// when defining a network, all tasks like initialization 
-// or forward tasks will be done by the network object
-
-// All functions here are safe to call by derived classes.
-// If it is not applicable (e.g. update() on ReLU) it will
-// simply do nothing.
+// This is an interface
+// it has the functions a layer in a DNN might call:
+// this includes the obvious forward, backward, and update
+// this also has the book keeping functions like
+// keeping track of the input output buffers,
+// and initializing weights and biases
+//
+// Everything here is pure virtual
+// classes that implement this interface:
+// Primitive (primitive.h)
+// Padder    (padder.h)
 class NetComponent {
   public:
     // Forward Propagation for this layer.
