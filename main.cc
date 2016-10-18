@@ -47,5 +47,7 @@ int main() {
     net.update(&sgd, 0.001f);
     std::cout << "update complete" << std::endl;
   }
+  free(inputData);
   std::cout << "Done" << std::endl;
+  return 0;
 }

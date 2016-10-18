@@ -12,11 +12,15 @@ SequentialNetwork::SequentialNetwork(size_t batch_size,
     classes_ = classes;
 }
 SequentialNetwork::~SequentialNetwork() {
-    for (auto r : data_tensors_) {
-        dnnReleaseBuffer_F32(r);
+    for (int i = 1; i < data_tensors_.size(); i++) {
+        if (data_tensors_[i] != nullptr) {
+            dnnReleaseBuffer_F32(data_tensors_[i]);
+        }
     }
-    for (auto r : gradient_tensors_) {
-        dnnReleaseBuffer_F32(r);
+    for (int i = 1; i < gradient_tensors_.size(); i++) {
+        if (gradient_tensors_[i] != nullptr) {
+            dnnReleaseBuffer_F32(gradient_tensors_[i]);
+        }
     }
     for (auto p : net_) {
         delete p;
@@ -49,76 +53,45 @@ void SequentialNetwork::finalize_layers() {
         // the users already did all the work they need to do
         // by specifying the padding sizes
         std::vector<size_t> padding_size;
-        std::vector<size_t> padded_dimensions;
         if (layers_[i]->needsPadding(padding_size)) {
             // TODO: that false means not unpadding for back prop
             // make sure that's always true
-            // construct the padder and allocate its buffers
+            std::vector<size_t> padded_dimensions;
             net_.push_back(new Padder(input_dimensions, padding_size, padded_dimensions, false));
-            std::cout << "added component " << component_index++ << std::endl;
-            for (auto const d : input_dimensions) std::cout << d << " ";
-            std::cout << " >> ";
-            for (auto const d : padded_dimensions) std::cout << d << " ";
-            std::cout << std::endl;
-            // calculate the buffer sizes
-            size_t const pad_dim = padded_dimensions.size();
-            size_t pad_sizes[pad_dim];
-            size_t pad_str = 1;
-            size_t pad_strides[pad_dim];
-            for (int d = 0; d < pad_dim; d++) {
-                pad_sizes[d] = padded_dimensions[d];
-                pad_strides[d] = pad_str;
-                pad_str *= pad_sizes[d];
-            }
-            // allocate the buffers
-            dnnLayout_t pad_layout;
-            dnnLayoutCreate_F32(&pad_layout, pad_dim, pad_sizes, pad_strides);
+            component_index++;
             void *pad_data;
             void *pad_gradient;
-            dnnAllocateBuffer_F32(&pad_data, pad_layout);
-            dnnAllocateBuffer_F32(&pad_gradient, pad_layout);
-            dnnLayoutDelete_F32(pad_layout);
+            std::cout << "allocating the buffer after component " << component_index-1 << std::endl;
+            allocateBuffer(padded_dimensions, pad_data);
+            allocateBuffer(padded_dimensions, pad_gradient);
             // store the pointers to the buffers
             data_tensors_.push_back(pad_data);
             gradient_tensors_.push_back(pad_gradient);
             //construct the acutal primitive
             net_.push_back(new Primitive(layers_[i], padded_dimensions, output_dimensions));
-            std::cout << "added component " << component_index++ << std::endl;
-            for (auto const d : padded_dimensions) std::cout << d << " ";
-            std::cout << " >> ";
-            for (auto const d : output_dimensions) std::cout << d << " ";
-            std::cout << std::endl;
+            component_index++;
         } else {
             net_.push_back(new Primitive(layers_[i], input_dimensions, output_dimensions));
-            std::cout << "added component " << component_index++ << std::endl;
-            for (auto const d : input_dimensions) std::cout << d << " ";
-            std::cout << " >> ";
-            for (auto const d : output_dimensions) std::cout << d << " ";
-            std::cout << std::endl;
+            component_index++;
         }
-        input_dimensions = output_dimensions;
+        void *data;
+        void *gradient;
         // the tensor resources are allocated here
         // the data and the gradient tensors have the same dimensions
         // this is WHCN
-        size_t const dim = output_dimensions.size();
-        size_t sizes[dim];
-        size_t str = 1;
-        size_t strides[dim];
-        for (int d = 0; d < dim; d++) {
-            sizes[d]=output_dimensions[d];
-            strides[d] = str;
-            str *= sizes[d];
-        }
-        dnnLayout_t layout;
-        dnnLayoutCreate_F32(&layout, dim, sizes, strides);
-        void *data;
-        void *gradient;
-        dnnAllocateBuffer_F32(&data, layout);
-        dnnAllocateBuffer_F32(&gradient, layout);
-        dnnLayoutDelete_F32(layout);
+        std::cout << "allocating the buffer after component " << component_index-1 << std::endl;
+        allocateBuffer(output_dimensions, data);
+        allocateBuffer(output_dimensions, gradient);
         data_tensors_.push_back(data);
         gradient_tensors_.push_back(gradient);
+        //next layer's input is this layer's output
+        input_dimensions = output_dimensions;
     }
+    
+    std::cout << "layer " << layers_.size() << std::endl
+              << "data  " << data_tensors_.size() << std::endl
+              << "grad  " << gradient_tensors_.size() << std::endl
+              << "net   " << net_.size() << std::endl;
     // when all the primitives and the neighboring buffers are ready
     // the primitives are given the pointers to the buffers
     for (int i = 0; i < net_.size(); i++) {
@@ -174,4 +147,29 @@ void SequentialNetwork::update(Optimizer *opt, float learning_rate) {
         net_[i]->update(opt, learning_rate);
         std::cout << "finished" << std::endl;
     }
+}
+void SequentialNetwork::allocateBuffer(vector<size_t> const &dimensions, void *data) {
+    for (auto const &i : dimensions) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+    // calculate the buffer sizes
+    size_t const dim = dimensions.size();
+    size_t sizes[dim];
+    size_t str = 1;
+    size_t strides[dim];
+    for (int d = 0; d < dim; d++) {
+        sizes[d] = dimensions[d];
+        strides[d] = str;
+        str *= sizes[d];
+    }
+    // allocate the buffers
+    dnnError_t e;
+    dnnLayout_t layout;
+    e = dnnLayoutCreate_F32(&layout, dim, sizes, strides);
+    if (e != E_SUCCESS) std::cout << "layout create failed\n";
+    e = dnnAllocateBuffer_F32(&data, layout);
+    if (e != E_SUCCESS) std::cout << "layout allocate buffer failed\n";
+    e = dnnLayoutDelete_F32(layout);
+    if (e != E_SUCCESS) std::cout << "layout delete failed\n";
 }
