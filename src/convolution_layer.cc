@@ -31,8 +31,8 @@ void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimension
   // TODO: Check dimensions
   // Computing Dimensions. Convolution does not change size. 
 
-  size_t dst_w = std::ceil(((float) (src_dimensions[0]-kernel_w_+2*padding_w_))/stride_w_)+1;
-  size_t dst_h = std::ceil(((float) (src_dimensions[1]-kernel_h_+2*padding_h_))/stride_h_)+1;
+  size_t dst_w = std::ceil(((float) (src_dimensions[0]-kernel_w_))/stride_w_)+1;
+  size_t dst_h = std::ceil(((float) (src_dimensions[1]-kernel_h_))/stride_h_)+1;
   dst_dimensions.push_back(dst_w); 
   dst_dimensions.push_back(dst_h); 
   dst_dimensions.push_back(output_c_); 
