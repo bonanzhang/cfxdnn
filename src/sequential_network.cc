@@ -109,10 +109,6 @@ void SequentialNetwork::forward(void *X) {
     std::cout << "DATA: " << ((float *)data_tensors_[count])[0] << std::endl;
     for (auto &layer : net_) {
         layer->forward();
-        std::cout << "DATA: " << ((float *)data_tensors_[count+1])[0] << std::endl;
-        std::cout << "DATA2: " << ((float *)layer->getResource(dnnResourceDst))[0] << std::endl;
-        if(layer->getResource(dnnResourceFilter))
-        std::cout << "WEIGHT: " << ((float *)layer->getResource(dnnResourceFilter))[0] << std::endl;
         count++;
     }
 }

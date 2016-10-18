@@ -1,6 +1,8 @@
 #ifndef SEQUENTIAL_NETWORK_H
 #define SEQUENTIAL_NETWORK_H
+#include "net_component.h"
 #include "primitive.h"
+#include "padder.h"
 #include "layer.h"
 #include "softmax_objective.h"
 // A container wrapper around the MKL DNN primitives
@@ -37,7 +39,7 @@ class SequentialNetwork {
     void update(Optimizer *opt, float learning_rate);
   private:
     vector<Layer *> layers_;
-    vector<Primitive *> net_;
+    vector<NetComponent *> net_;
     size_t batch_size_;
     size_t channel_;
     size_t height_;
