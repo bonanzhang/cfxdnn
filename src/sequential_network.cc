@@ -128,7 +128,6 @@ void SequentialNetwork::forward(void *X) {
     for (int i = 0; i < net_.size(); i++) {
         std::cout << "net components: " << i << std::endl;
         net_[i]->forward();
-        std::cout << "finished" << std::endl;
     }
 }
 float SequentialNetwork::getLoss(SoftMaxObjective *obj, vector<size_t> const &truth) {

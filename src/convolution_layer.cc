@@ -25,8 +25,8 @@ void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimension
   const size_t dimension = src_dimensions.size();
   // TODO: Check dimensions
   // Computing Dimensions. Convolution does not change size. 
-  size_t dst_w = std::ceil(((float) (src_dimensions[0]-kernel_w_))/stride_w_)+1;
-  size_t dst_h = std::ceil(((float) (src_dimensions[1]-kernel_h_))/stride_h_)+1;
+  size_t dst_w = std::ceil(((float) (src_dimensions[0]-kernel_w_+2*padding_w_))/stride_w_)+1;
+  size_t dst_h = std::ceil(((float) (src_dimensions[1]-kernel_h_+2*padding_h_))/stride_h_)+1;
   dst_dimensions.push_back(dst_w); 
   dst_dimensions.push_back(dst_h); 
   dst_dimensions.push_back(output_c_); 
@@ -59,13 +59,13 @@ void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimension
 
   } else {
     int e = dnnConvolutionCreateForward_F32(&fwd_p[0], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
-//    dnnLayout_t dbg_layout;
-//    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceSrc);
-//    std::cout << "conv src: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
-//    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceDst);
-//    std::cout << "conv dst: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
-//    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceFilter);
-//    std::cout << "conv ker: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
+    dnnLayout_t dbg_layout;
+    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceSrc);
+    std::cout << "conv src: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
+    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceDst);
+    std::cout << "conv dst: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
+    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceFilter);
+    std::cout << "conv ker: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
     // Requested Fwd Resource for Convolution
     requested_fwd_resources[0].push_back(dnnResourceFilter);
 

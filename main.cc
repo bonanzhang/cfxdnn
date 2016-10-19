@@ -49,9 +49,9 @@ int main() {
     std::cout << "training iteration " << i << std::endl;
     net.forward(inputData);
     std::cout << "forward pass complete" << std::endl;
-//    float loss = net.getLoss(&obj, ground_truth);
-//    std::cout << "loss calculation complete" << std::endl;
-//    std::cout << loss << std::endl;
+    float loss = net.getLoss(&obj, ground_truth);
+    std::cout << "loss calculation complete" << std::endl;
+    std::cout << loss << std::endl;
 //    std::cout << "starting backward pass" << std::endl;
 //    net.backward();
 //    std::cout << "backward pass complete" << std::endl;
