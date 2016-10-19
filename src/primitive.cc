@@ -47,35 +47,6 @@ Primitive::Primitive(Layer *l,
       } // else {TODO}
     }
   }
-
-  dnnLayout_t pLayout;
-  int e = dnnLayoutCreateFromPrimitive_F32(&pLayout, forward_primitives_[0],
-                                           dnnResourceSrc);
-  size_t size = 1;
-  for (int i = 0; i < src_dimensions.size(); i++) {
-    size *= src_dimensions[i];
-  }
-
-  dnnLayoutCreateFromPrimitive_F32(&pLayout, forward_primitives_[0],
-                                   dnnResourceDst);
-  size = 1;
-  for (int i = 0; i < dst_dimensions.size(); i++) {
-    size *= dst_dimensions[i];
-  }
-
-  dnnLayoutCreateFromPrimitive_F32(&pLayout, backward_primitives_[0],
-                                   dnnResourceDiffSrc);
-  size = 1;
-  for (int i = 0; i < src_dimensions.size(); i++) {
-    size *= src_dimensions[i];
-  }
-
-  dnnLayoutCreateFromPrimitive_F32(&pLayout, backward_primitives_[0],
-                                   dnnResourceDiffDst);
-  size = 1;
-  for (int i = 0; i < dst_dimensions.size(); i++) {
-    size *= dst_dimensions[i];
-  }
 }
 
 Primitive::~Primitive() {
@@ -96,15 +67,19 @@ Primitive::~Primitive() {
 }
 void Primitive::forward() {
   for (int i = 0; i < forward_primitives_.size(); i++) {
-    //    std::cout << "execute forward with input: " <<
-    //    resources_[dnnResourceSrc] << std::endl;
-    //    std::cout << "execute forward with output: " <<
-    //    resources_[dnnResourceDst] << std::endl;
+    std::cout << "execute forward with input: " <<
+    resources_[dnnResourceSrc] << std::endl;
+    std::cout << "execute forward with output: " <<
+    resources_[dnnResourceDst] << std::endl;
     dnnExecute_F32(forward_primitives_[i], resources_);
   }
 }
 void Primitive::backward() {
   for (int i = 0; i < backward_primitives_.size(); i++) {
+    std::cout << "execute backward with input: " <<
+    resources_[dnnResourceDiffSrc] << std::endl;
+    std::cout << "execute backward with output: " <<
+    resources_[dnnResourceDiffDst] << std::endl;
     dnnExecute_F32(backward_primitives_[i], resources_);
   }
 }

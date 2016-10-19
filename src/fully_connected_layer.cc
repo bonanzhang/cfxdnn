@@ -14,14 +14,12 @@ void FullyConnectedLayer::createPrimitives(std::vector<size_t> const &src_dimens
   // Computing Dimensions. FullyConnected does not change size. 
   dst_dimensions.push_back(output_channels_);
   dst_dimensions.push_back(src_dimensions[dimension-1]); 
- 
   // Making a copy of input and output dims because the primitive
   // needs size_t*. 
   size_t src_dimensions_[dimension]; 
   for(int i = 0; i < dimension; i++) { 
     src_dimensions_[i] = src_dimensions[i]; 
   }
-
   // Creating the Primitives
   if(bias_) {  // With bias
     // Pirimitives are carried out in order. 
@@ -30,7 +28,7 @@ void FullyConnectedLayer::createPrimitives(std::vector<size_t> const &src_dimens
     requested_fwd_resources[0].push_back(dnnResourceFilter);
     requested_fwd_resources[0].push_back(dnnResourceBias);
 
-    // For FC fwd: 0->backward, 1->filter, 2-> bias
+    // For FC bwd: 0->backward, 1->filter, 2-> bias
     dnnInnerProductCreateBackwardData_F32(&bwd_p[0], NULL, dimension, src_dimensions_, output_channels_);
     dnnInnerProductCreateBackwardFilter_F32(&bwd_p[1], NULL, dimension, src_dimensions_, output_channels_);
     requested_bwd_resources[1].push_back(dnnResourceDiffFilter);
@@ -42,7 +40,7 @@ void FullyConnectedLayer::createPrimitives(std::vector<size_t> const &src_dimens
     dnnInnerProductCreateForward_F32(&fwd_p[0], NULL, dimension, src_dimensions_, output_channels_);
     requested_fwd_resources[0].push_back(dnnResourceFilter);
 
-    // For FC fwd: 0->backward, 1->filter, 2-> bias
+    // For FC bwd: 0->backward, 1->filter
     dnnInnerProductCreateBackwardData_F32(&bwd_p[0], NULL, dimension, src_dimensions_, output_channels_);
     dnnInnerProductCreateBackwardFilter_F32(&bwd_p[1], NULL, dimension, src_dimensions_, output_channels_);
     requested_bwd_resources[1].push_back(dnnResourceDiffFilter);

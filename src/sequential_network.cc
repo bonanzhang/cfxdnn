@@ -25,6 +25,9 @@ SequentialNetwork::~SequentialNetwork() {
     for (auto p : net_) {
         delete p;
     }
+    for (auto l : layers_) {
+        delete l;
+    }
 }
 int SequentialNetwork::add_layer(Layer *l) {
     int id = layers_.size();
@@ -41,7 +44,6 @@ void SequentialNetwork::finalize_layers() {
     input_dimensions.push_back(height_);
     input_dimensions.push_back(channel_);
     input_dimensions.push_back(batch_size_);
-    int component_index = 0;
     for (int i = 0; i < layers_.size(); i++) {
         vector<size_t> output_dimensions;
         // each time a primitive is contructed,
@@ -58,32 +60,25 @@ void SequentialNetwork::finalize_layers() {
             // make sure that's always true
             std::vector<size_t> padded_dimensions;
             net_.push_back(new Padder(input_dimensions, padding_size, padded_dimensions, false));
-            component_index++;
             void *pad_data;
             void *pad_gradient;
             allocateBuffer(padded_dimensions, pad_data);
             allocateBuffer(padded_dimensions, pad_gradient);
-            std::cout << "addr of pad gradient " << pad_gradient << "\n";
             // store the pointers to the buffers
             data_tensors_.push_back(pad_data);
             gradient_tensors_.push_back(pad_gradient);
             //construct the acutal primitive
             net_.push_back(new Primitive(layers_[i], padded_dimensions, output_dimensions));
-            component_index++;
         } else {
             net_.push_back(new Primitive(layers_[i], input_dimensions, output_dimensions));
-            component_index++;
         }
         void *data = nullptr;
         void *gradient = nullptr;
         // the tensor resources are allocated here
         // the data and the gradient tensors have the same dimensions
         // this is WHCN
-//        std::cout << "allocating the buffer after component " << component_index-1 << std::endl;
         allocateBuffer(output_dimensions, data);
-//        std::cout << "addr of " << static_cast<void*>(data) << "\n";
         allocateBuffer(output_dimensions, gradient);
-        std::cout << "addr of gradient " << gradient << "\n";
         data_tensors_.push_back(data);
         gradient_tensors_.push_back(gradient);
         //next layer's input is this layer's output
@@ -97,11 +92,13 @@ void SequentialNetwork::finalize_layers() {
     // when all the primitives and the neighboring buffers are ready
     // the primitives are given the pointers to the buffers
     for (int i = 0; i < net_.size(); i++) {
+        std::cout << "i=" << i << " (forward)  from: " << data_tensors_[i] 
+                  << " to: " << data_tensors_[i+1] << std::endl;
+        std::cout << "i=" << i << " (backward) from: " << gradient_tensors_[i+1] 
+                  << " to: " << gradient_tensors_[i] << std::endl;
         net_[i]->setFwdInput(data_tensors_[i]);
         net_[i]->setFwdOutput(data_tensors_[i+1]);
-        std::cout << "i=" << i << " from " << gradient_tensors_[i+1] << std::endl;
         net_[i]->setBwdInput(gradient_tensors_[i+1]);
-        std::cout << "i=" << i << " to " << gradient_tensors_[i] << std::endl;
         net_[i]->setBwdOutput(gradient_tensors_[i]);
     }
     // initialize each primitive's weights
@@ -125,9 +122,9 @@ void SequentialNetwork::forward(void *X) {
     std::cout << "input set for i=0 " << X << std::endl;
     std::cout << "forward pass for all " << net_.size() << " net components" << std::endl;
     for (int i = 0; i < net_.size(); i++) {
-//        std::cout << "net components: " << i << "...";
+        std::cout << "net components: " << i << std::endl;
         net_[i]->forward();
-//        std::cout << "finished" << std::endl;
+        std::cout << "finished" << std::endl;
     }
 }
 float SequentialNetwork::getLoss(SoftMaxObjective *obj, vector<size_t> const &truth) {
@@ -140,7 +137,7 @@ float SequentialNetwork::getLoss(SoftMaxObjective *obj, vector<size_t> const &tr
 void SequentialNetwork::backward() {
     std::cout << "backard pass for all " << net_.size() << " net components" << std::endl;
     for (int i = net_.size()-1; i >= 0; i--) {
-        std::cout << "net components: " << i << "...";
+        std::cout << "net components: " << i << std::endl;
         net_[i]->backward();
         std::cout << "finished" << std::endl;
     }
@@ -148,16 +145,12 @@ void SequentialNetwork::backward() {
 void SequentialNetwork::update(Optimizer *opt, float learning_rate) {
     std::cout << "update for all " << net_.size() << " net components" << std::endl;
     for (int i = 0; i < net_.size(); i++) {
-        std::cout << "net components: " << i << "...";
+        std::cout << "net components: " << i << std::endl;
         net_[i]->update(opt, learning_rate);
         std::cout << "finished" << std::endl;
     }
 }
 void SequentialNetwork::allocateBuffer(vector<size_t> const &dimensions, void * &data) {
-//    for (auto const &i : dimensions) {
-//        std::cout << i << " ";
-//    }
-//    std::cout << std::endl;
     // calculate the buffer sizes
     size_t const dim = dimensions.size();
     size_t sizes[dim];
@@ -177,4 +170,10 @@ void SequentialNetwork::allocateBuffer(vector<size_t> const &dimensions, void * 
     if (e != E_SUCCESS) std::cout << "layout allocate buffer failed\n";
     e = dnnLayoutDelete_F32(layout);
     if (e != E_SUCCESS) std::cout << "layout delete failed\n";
+    std::cout << "Allocate A Buffer with dimensions: ";
+    for (auto const &i : dimensions) {
+        std::cout << i << " ";
+    }
+    std::cout << std::endl;
+    std::cout << "At: " << data << std::endl;
 }
