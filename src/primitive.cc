@@ -1,138 +1,149 @@
 #include "primitive.h"
 #include <iostream>
-Primitive::Primitive(Layer *l, std::vector<size_t> const &src_dimensions, std::vector<size_t> &dst_dimensions) {
-  // Initializing resource pointers to null (needed for the update() to work) 
-  for(int i = 0; i < dnnResourceNumber; i++) {
-    resources[i] = nullptr;
-  }  
-  // Initializing the primitives vector;
-  size_t const numberOfFwdPrimitives = l->getNumberOfFwdPrimitives();
-  size_t const numberOfBwdPrimitives = l->getNumberOfBwdPrimitives();
-  forward_p = std::vector<dnnPrimitive_t>(numberOfFwdPrimitives, dnnPrimitive_t());
-  backward_p = std::vector<dnnPrimitive_t>(numberOfBwdPrimitives, dnnPrimitive_t());
-  requested_fwd_resources = std::vector<std::vector<dnnResourceType_t>>(numberOfFwdPrimitives, std::vector<dnnResourceType_t>());
-  requested_bwd_resources = std::vector<std::vector<dnnResourceType_t>>(numberOfBwdPrimitives, std::vector<dnnResourceType_t>());
+Primitive::Primitive(Layer *l, 
+                     vector<size_t> const &src_dimensions,
+                     vector<size_t> &dst_dimensions)
+    : forward_primitives_(l->getNumberOfFwdPrimitives()),
+      backward_primitives_(l->getNumberOfBwdPrimitives()),
+      requested_fwd_resources_(l->getNumberOfFwdPrimitives()),
+      requested_bwd_resources_(l->getNumberOfBwdPrimitives()) {
+  // Initializing resource pointers to null (needed for the update() to work)
+  for (int i = 0; i < dnnResourceNumber; i++) {
+    resources_[i] = nullptr;
+  }
   // Vector containing resouce types that are requested by the layer
-  l->createPrimitives(src_dimensions, dst_dimensions, 
-                      forward_p, backward_p, 
-                      requested_fwd_resources, requested_bwd_resources);
-  // Allocating requested resources 
-  for(int i = 0; i < requested_fwd_resources.size(); i++) {
-    for(int j = 0; j < requested_fwd_resources[i].size(); j++) {
+  l->createPrimitives(src_dimensions, dst_dimensions, forward_primitives_,
+                      backward_primitives_, requested_fwd_resources_,
+                      requested_bwd_resources_);
+  // Allocating requested resources
+  for (int i = 0; i < requested_fwd_resources_.size(); i++) {
+    for (int j = 0; j < requested_fwd_resources_[i].size(); j++) {
       dnnLayout_t pLayout;
-      dnnError_t e = dnnLayoutCreateFromPrimitive_F32(&pLayout, forward_p[i], requested_fwd_resources[i][j]);
-      if (e != E_SUCCESS) std::cout << "resource layout from primitive failed\n" << std::flush;
-      //TODO: errors when layer does not work;
-      if(e == E_SUCCESS) { 
-        dnnAllocateBuffer_F32(&resources[requested_fwd_resources[i][j]], pLayout);
-        resource_sizes[requested_fwd_resources[i][j]] = dnnLayoutGetMemorySize_F32(pLayout)/sizeof(float);
+      dnnError_t e = dnnLayoutCreateFromPrimitive_F32(
+          &pLayout, forward_primitives_[i], requested_fwd_resources_[i][j]);
+      if (e != E_SUCCESS)
+        std::cout << "resource layout from primitive failed\n" << std::flush;
+      // TODO: errors when layer does not work;
+      if (e == E_SUCCESS) {
+        dnnAllocateBuffer_F32(&resources_[requested_fwd_resources_[i][j]],
+                              pLayout);
+        resource_sizes_[requested_fwd_resources_[i][j]] =
+            dnnLayoutGetMemorySize_F32(pLayout) / sizeof(float);
         dnnLayoutDelete_F32(pLayout);
       } // else {TODO}
-    } 
+    }
   }
-  for(int i = 0; i < requested_bwd_resources.size(); i++) {
-    for(int j = 0; j < requested_bwd_resources[i].size(); j++) {
+  for (int i = 0; i < requested_bwd_resources_.size(); i++) {
+    for (int j = 0; j < requested_bwd_resources_[i].size(); j++) {
       dnnLayout_t pLayout;
-      dnnError_t e = dnnLayoutCreateFromPrimitive_F32(&pLayout, backward_p[i], requested_bwd_resources[i][j]);
-      if(e == E_SUCCESS) { 
-        dnnAllocateBuffer_F32(&resources[requested_bwd_resources[i][j]], pLayout);
-        resource_sizes[requested_bwd_resources[i][j]] = dnnLayoutGetMemorySize_F32(pLayout)/sizeof(float);
+      dnnError_t e = dnnLayoutCreateFromPrimitive_F32(
+          &pLayout, backward_primitives_[i], requested_bwd_resources_[i][j]);
+      if (e == E_SUCCESS) {
+        dnnAllocateBuffer_F32(&resources_[requested_bwd_resources_[i][j]],
+                              pLayout);
+        resource_sizes_[requested_bwd_resources_[i][j]] =
+            dnnLayoutGetMemorySize_F32(pLayout) / sizeof(float);
         dnnLayoutDelete_F32(pLayout);
       } // else {TODO}
-    } 
+    }
   }
-  
 
   dnnLayout_t pLayout;
-  int e = dnnLayoutCreateFromPrimitive_F32(&pLayout, forward_p[0], dnnResourceSrc);
+  int e = dnnLayoutCreateFromPrimitive_F32(&pLayout, forward_primitives_[0],
+                                           dnnResourceSrc);
   size_t size = 1;
-  for(int i = 0; i < src_dimensions.size(); i++) {
-    size*=src_dimensions[i];
-  } 
+  for (int i = 0; i < src_dimensions.size(); i++) {
+    size *= src_dimensions[i];
+  }
 
-  dnnLayoutCreateFromPrimitive_F32(&pLayout, forward_p[0], dnnResourceDst);
+  dnnLayoutCreateFromPrimitive_F32(&pLayout, forward_primitives_[0],
+                                   dnnResourceDst);
   size = 1;
-  for(int i = 0; i < dst_dimensions.size(); i++) {
-    size*=dst_dimensions[i];
-  } 
+  for (int i = 0; i < dst_dimensions.size(); i++) {
+    size *= dst_dimensions[i];
+  }
 
-  dnnLayoutCreateFromPrimitive_F32(&pLayout, backward_p[0], dnnResourceDiffSrc);
+  dnnLayoutCreateFromPrimitive_F32(&pLayout, backward_primitives_[0],
+                                   dnnResourceDiffSrc);
   size = 1;
-  for(int i = 0; i < src_dimensions.size(); i++) {
-    size*=src_dimensions[i];
-  } 
+  for (int i = 0; i < src_dimensions.size(); i++) {
+    size *= src_dimensions[i];
+  }
 
-  dnnLayoutCreateFromPrimitive_F32(&pLayout, backward_p[0], dnnResourceDiffDst);
+  dnnLayoutCreateFromPrimitive_F32(&pLayout, backward_primitives_[0],
+                                   dnnResourceDiffDst);
   size = 1;
-  for(int i = 0; i < dst_dimensions.size(); i++) {
-    size*=dst_dimensions[i];
-  } 
+  for (int i = 0; i < dst_dimensions.size(); i++) {
+    size *= dst_dimensions[i];
+  }
 }
 
 Primitive::~Primitive() {
   // Release Forward resources
-  for(int i = 0; i < forward_p.size(); i++) {
-    dnnDelete_F32(forward_p[i]);
-    for(int j = 0; j < requested_fwd_resources[i].size(); j++) {
-      dnnReleaseBuffer_F32(resources[requested_fwd_resources[i][j]]);
+  for (int i = 0; i < forward_primitives_.size(); i++) {
+    dnnDelete_F32(forward_primitives_[i]);
+    for (int j = 0; j < requested_fwd_resources_[i].size(); j++) {
+      dnnReleaseBuffer_F32(resources_[requested_fwd_resources_[i][j]]);
     }
   }
   // Release Backward resources
-  for(int i = 0; i < backward_p.size(); i++) {
-    dnnDelete_F32(backward_p[i]);
-    for(int j = 0; j < requested_bwd_resources[i].size(); j++) {
-      dnnReleaseBuffer_F32(resources[requested_bwd_resources[i][j]]);
+  for (int i = 0; i < backward_primitives_.size(); i++) {
+    dnnDelete_F32(backward_primitives_[i]);
+    for (int j = 0; j < requested_bwd_resources_[i].size(); j++) {
+      dnnReleaseBuffer_F32(resources_[requested_bwd_resources_[i][j]]);
     }
   }
 }
 void Primitive::forward() {
-  for(int i = 0; i < forward_p.size(); i++) {
-    dnnExecute_F32(forward_p[i], resources);
+  for (int i = 0; i < forward_primitives_.size(); i++) {
+    //    std::cout << "execute forward with input: " <<
+    //    resources_[dnnResourceSrc] << std::endl;
+    //    std::cout << "execute forward with output: " <<
+    //    resources_[dnnResourceDst] << std::endl;
+    dnnExecute_F32(forward_primitives_[i], resources_);
   }
 }
 void Primitive::backward() {
-  for(int i = 0; i < backward_p.size(); i++) {
-    dnnExecute_F32(backward_p[i], resources);
+  for (int i = 0; i < backward_primitives_.size(); i++) {
+    dnnExecute_F32(backward_primitives_[i], resources_);
   }
 }
 void Primitive::update(Optimizer *opt, float learning_rate) {
   std::cout << "updating..." << std::flush;
-  if (resources[dnnResourceFilter] != nullptr && resources[dnnResourceDiffFilter] != nullptr) {
+  if (resources_[dnnResourceFilter] != nullptr &&
+      resources_[dnnResourceDiffFilter] != nullptr) {
     std::cout << "filter" << std::flush;
-    opt->applyOptimization((float *) resources[dnnResourceFilter], 
-                           (float *) resources[dnnResourceDiffFilter],
-                           resource_sizes[dnnResourceFilter],
-                           learning_rate);
+    opt->applyOptimization((float *)resources_[dnnResourceFilter],
+                           (float *)resources_[dnnResourceDiffFilter],
+                           resource_sizes_[dnnResourceFilter], learning_rate);
   }
   std::cout << "..." << std::flush;
-  if (resources[dnnResourceBias] != nullptr && resources[dnnResourceDiffBias] != nullptr) {
+  if (resources_[dnnResourceBias] != nullptr &&
+      resources_[dnnResourceDiffBias] != nullptr) {
     std::cout << "bias" << std::flush;
-    opt->applyOptimization((float *) resources[dnnResourceBias], 
-                           (float *) resources[dnnResourceDiffBias],
-                           resource_sizes[dnnResourceBias],
-                           learning_rate);
+    opt->applyOptimization((float *)resources_[dnnResourceBias],
+                           (float *)resources_[dnnResourceDiffBias],
+                           resource_sizes_[dnnResourceBias], learning_rate);
   }
 }
 void Primitive::initialize(Initializer *ini) {
-  if (resources[dnnResourceFilter]) {
-    ini->fill((float *) resources[dnnResourceFilter], resource_sizes[dnnResourceFilter]);
+  if (resources_[dnnResourceFilter]) {
+    ini->fill((float *)resources_[dnnResourceFilter],
+              resource_sizes_[dnnResourceFilter]);
   }
-  if (resources[dnnResourceBias]) {
-    ini->fill((float *) resources[dnnResourceBias], resource_sizes[dnnResourceBias]);
+  if (resources_[dnnResourceBias]) {
+    ini->fill((float *)resources_[dnnResourceBias],
+              resource_sizes_[dnnResourceBias]);
   }
 }
-void Primitive::setFwdInput(void *src) {
-  resources[dnnResourceSrc] = src;
-}
-void Primitive::setFwdOutput(void *dst) {
-  resources[dnnResourceDst] = dst;
-}
+void Primitive::setFwdInput(void *src) { resources_[dnnResourceSrc] = src; }
+void Primitive::setFwdOutput(void *dst) { resources_[dnnResourceDst] = dst; }
 void Primitive::setBwdInput(void *diffdst) {
-  resources[dnnResourceDiffDst] = diffdst;
+  resources_[dnnResourceDiffDst] = diffdst;
 }
 void Primitive::setBwdOutput(void *diffsrc) {
-  resources[dnnResourceDiffSrc] = diffsrc;
+  resources_[dnnResourceDiffSrc] = diffsrc;
 }
-void * Primitive::getResource(dnnResourceType_t type) {
-  return resources[type];
+void *Primitive::getResource(dnnResourceType_t type) {
+  return resources_[type];
 }

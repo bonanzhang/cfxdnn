@@ -1,6 +1,7 @@
 #ifndef PRIMITIVE_H
 #define PRIMITIVE_H
 #include <vector>
+using std::vector;
 #include "mkl_dnn.h"
 #include "layer.h"
 #include "net_component.h"
@@ -20,8 +21,8 @@
 class Primitive : public NetComponent {
   public:
     Primitive(Layer *l,
-              std::vector<size_t> const &input_dimensions,
-              std::vector<size_t> &output_dimensions);
+              vector<size_t> const &input_dimensions,
+              vector<size_t> &output_dimensions);
     ~Primitive();
     // Forward Propagation for this layer.
     void forward();
@@ -40,14 +41,14 @@ class Primitive : public NetComponent {
     // Get pointer to buffer (resource). Used to get, for 
     // example, the weights of a given layer
     void* getResource(dnnResourceType_t type);
-  protected:
+  private:
     // dnnPrimitives is the Intel MKL computational kernel 
-    std::vector<dnnPrimitive_t> forward_p;
-    std::vector<dnnPrimitive_t> backward_p;
+    vector<dnnPrimitive_t> forward_primitives_;
+    vector<dnnPrimitive_t> backward_primitives_;
     // Contains the resources. Use getResource() to access.
-    void* resources[dnnResourceNumber];
-    size_t resource_sizes[dnnResourceNumber];
-    std::vector<std::vector<dnnResourceType_t>> requested_fwd_resources;
-    std::vector<std::vector<dnnResourceType_t>> requested_bwd_resources;
+    void* resources_[dnnResourceNumber];
+    size_t resource_sizes_[dnnResourceNumber];
+    vector<vector<dnnResourceType_t>> requested_fwd_resources_;
+    vector<vector<dnnResourceType_t>> requested_bwd_resources_;
 };
 #endif // PRIMITIVE_H

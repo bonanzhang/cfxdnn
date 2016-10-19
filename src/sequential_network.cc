@@ -62,8 +62,8 @@ void SequentialNetwork::finalize_layers() {
             void *pad_data;
             void *pad_gradient;
             allocateBuffer(padded_dimensions, pad_data);
-            std::cout << "addr of " << pad_data << "\n";
             allocateBuffer(padded_dimensions, pad_gradient);
+            std::cout << "addr of pad gradient " << pad_gradient << "\n";
             // store the pointers to the buffers
             data_tensors_.push_back(pad_data);
             gradient_tensors_.push_back(pad_gradient);
@@ -82,8 +82,8 @@ void SequentialNetwork::finalize_layers() {
 //        std::cout << "allocating the buffer after component " << component_index-1 << std::endl;
         allocateBuffer(output_dimensions, data);
 //        std::cout << "addr of " << static_cast<void*>(data) << "\n";
-        std::cout << "addr of " << data << std::endl;
         allocateBuffer(output_dimensions, gradient);
+        std::cout << "addr of gradient " << gradient << "\n";
         data_tensors_.push_back(data);
         gradient_tensors_.push_back(gradient);
         //next layer's input is this layer's output
@@ -97,11 +97,11 @@ void SequentialNetwork::finalize_layers() {
     // when all the primitives and the neighboring buffers are ready
     // the primitives are given the pointers to the buffers
     for (int i = 0; i < net_.size(); i++) {
-        std::cout << "i=" << i << " from " << data_tensors_[i] << std::endl;
         net_[i]->setFwdInput(data_tensors_[i]);
-        std::cout << "i=" << i << " to " << data_tensors_[i+1] << std::endl;
         net_[i]->setFwdOutput(data_tensors_[i+1]);
+        std::cout << "i=" << i << " from " << gradient_tensors_[i+1] << std::endl;
         net_[i]->setBwdInput(gradient_tensors_[i+1]);
+        std::cout << "i=" << i << " to " << gradient_tensors_[i] << std::endl;
         net_[i]->setBwdOutput(gradient_tensors_[i]);
     }
     // initialize each primitive's weights
@@ -125,9 +125,9 @@ void SequentialNetwork::forward(void *X) {
     std::cout << "input set for i=0 " << X << std::endl;
     std::cout << "forward pass for all " << net_.size() << " net components" << std::endl;
     for (int i = 0; i < net_.size(); i++) {
-        std::cout << "net components: " << i << "...";
+//        std::cout << "net components: " << i << "...";
         net_[i]->forward();
-        std::cout << "finished" << std::endl;
+//        std::cout << "finished" << std::endl;
     }
 }
 float SequentialNetwork::getLoss(SoftMaxObjective *obj, vector<size_t> const &truth) {
