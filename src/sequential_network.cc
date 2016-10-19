@@ -67,7 +67,11 @@ void SequentialNetwork::finalize_layers() {
             // store the pointers to the buffers
             data_tensors_.push_back(pad_data);
             gradient_tensors_.push_back(pad_gradient);
-            //construct the acutal primitive
+            //construct the acutal primitive, which requires
+            //the original unpadded source dimensions
+            for(int d = 0; d < padding_size.size(); d++) {
+                padded_dimensions[d] -= 2 * padding_size[d];
+            }
             net_.push_back(new Primitive(layers_[i], padded_dimensions, output_dimensions));
         } else {
             net_.push_back(new Primitive(layers_[i], input_dimensions, output_dimensions));
