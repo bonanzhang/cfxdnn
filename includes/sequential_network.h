@@ -40,7 +40,7 @@ class SequentialNetwork {
     void update(Optimizer *opt, float learning_rate);
   private:
     //calling this will allocate the data the input pointer points to
-    void allocateBuffer(vector<size_t> const &dimensions, void *data);
+    void allocateBuffer(vector<size_t> const &dimensions, void * &data);
     vector<Layer *> layers_;
     vector<NetComponent *> net_;
     size_t batch_size_;

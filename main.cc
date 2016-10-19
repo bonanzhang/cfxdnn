@@ -9,6 +9,7 @@ int main() {
   size_t const input_w = 32;
   size_t const n_classes = 10;
   float *inputData = (float *) malloc(sizeof(float)*batch_size*input_c*input_h*input_w);
+  std::cout << "inputData allocated at " << static_cast<void*>(inputData) << std::endl;
   srand(0);
   for(int i = 0; i < batch_size*input_c*input_h*input_w; i++) inputData[i] = ((float)rand())/((float) RAND_MAX)-0.5;
   std::vector<size_t> ground_truth = {0,0,0,1,1,0,1,0,1,1}; 

@@ -61,8 +61,8 @@ void SequentialNetwork::finalize_layers() {
             component_index++;
             void *pad_data;
             void *pad_gradient;
-            std::cout << "allocating the buffer after component " << component_index-1 << std::endl;
             allocateBuffer(padded_dimensions, pad_data);
+            std::cout << "addr of " << pad_data << "\n";
             allocateBuffer(padded_dimensions, pad_gradient);
             // store the pointers to the buffers
             data_tensors_.push_back(pad_data);
@@ -74,13 +74,15 @@ void SequentialNetwork::finalize_layers() {
             net_.push_back(new Primitive(layers_[i], input_dimensions, output_dimensions));
             component_index++;
         }
-        void *data;
-        void *gradient;
+        void *data = nullptr;
+        void *gradient = nullptr;
         // the tensor resources are allocated here
         // the data and the gradient tensors have the same dimensions
         // this is WHCN
-        std::cout << "allocating the buffer after component " << component_index-1 << std::endl;
+//        std::cout << "allocating the buffer after component " << component_index-1 << std::endl;
         allocateBuffer(output_dimensions, data);
+//        std::cout << "addr of " << static_cast<void*>(data) << "\n";
+        std::cout << "addr of " << data << std::endl;
         allocateBuffer(output_dimensions, gradient);
         data_tensors_.push_back(data);
         gradient_tensors_.push_back(gradient);
@@ -95,7 +97,9 @@ void SequentialNetwork::finalize_layers() {
     // when all the primitives and the neighboring buffers are ready
     // the primitives are given the pointers to the buffers
     for (int i = 0; i < net_.size(); i++) {
+        std::cout << "i=" << i << " from " << data_tensors_[i] << std::endl;
         net_[i]->setFwdInput(data_tensors_[i]);
+        std::cout << "i=" << i << " to " << data_tensors_[i+1] << std::endl;
         net_[i]->setFwdOutput(data_tensors_[i+1]);
         net_[i]->setBwdInput(gradient_tensors_[i+1]);
         net_[i]->setBwdOutput(gradient_tensors_[i]);
@@ -118,6 +122,7 @@ void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer *o
 void SequentialNetwork::forward(void *X) {
     data_tensors_[0] = X;
     net_[0]->setFwdInput(X);
+    std::cout << "input set for i=0 " << X << std::endl;
     std::cout << "forward pass for all " << net_.size() << " net components" << std::endl;
     for (int i = 0; i < net_.size(); i++) {
         std::cout << "net components: " << i << "...";
@@ -148,11 +153,11 @@ void SequentialNetwork::update(Optimizer *opt, float learning_rate) {
         std::cout << "finished" << std::endl;
     }
 }
-void SequentialNetwork::allocateBuffer(vector<size_t> const &dimensions, void *data) {
-    for (auto const &i : dimensions) {
-        std::cout << i << " ";
-    }
-    std::cout << std::endl;
+void SequentialNetwork::allocateBuffer(vector<size_t> const &dimensions, void * &data) {
+//    for (auto const &i : dimensions) {
+//        std::cout << i << " ";
+//    }
+//    std::cout << std::endl;
     // calculate the buffer sizes
     size_t const dim = dimensions.size();
     size_t sizes[dim];
