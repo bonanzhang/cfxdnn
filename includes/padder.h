@@ -22,9 +22,9 @@ class Padder : public NetComponent {
     // Backward Propagation for this layer.
     void backward(); 
     // Updates weights of the layer based on the gradients.
-    void update(Optimizer* opt, float learning_rate);
+    void update(Optimizer const &opt, float learning_rate);
     // Fills the primitive's weights, if applicable
-    void initialize(Initializer *ini);
+    void initialize(Initializer const &ini);
     // "Connect" the layers in a neural network. This is done 
     // automatically by network objects (e.g. sequencial_network)
     void setFwdInput(void* src);

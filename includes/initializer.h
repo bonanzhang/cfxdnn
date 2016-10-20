@@ -4,6 +4,6 @@
 class Initializer {
   public:
     //this fills an arry of float v of length n
-    void fill(float *v, int n);
+    void fill(float *v, int n) const;
 };
 #endif // INITIALIZER_H

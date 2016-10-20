@@ -20,9 +20,9 @@ class NetComponent {
     // Backward Propagation for this layer.
     virtual void backward() = 0; 
     // Updates weights of the layer based on the gradients.
-    virtual void update(Optimizer* opt, float learning_rate) = 0;
+    virtual void update(Optimizer const &opt, float learning_rate) = 0;
     // Fills the primitive's weights, if applicable
-    virtual void initialize(Initializer *ini) = 0;
+    virtual void initialize(Initializer const &ini) = 0;
     // "Connect" the layers in a neural network. This is done 
     // automatically by network objects (e.g. sequencial_network)
     virtual void setFwdInput(void* src) = 0;

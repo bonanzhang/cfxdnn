@@ -43,11 +43,11 @@ void Padder::backward() {
 //TODO implements backwards
 } 
 // Updates weights of the layer based on the gradients.
-void Padder::update(Optimizer* opt, float learning_rate) {
+void Padder::update(Optimizer const &opt, float learning_rate) {
 
 }
 // Fills the primitive's weights, if applicable
-void Padder::initialize(Initializer *ini) {
+void Padder::initialize(Initializer const &ini) {
 
 }
 // "Connect" the layers in a neural network. This is done 

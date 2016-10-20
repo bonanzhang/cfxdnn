@@ -33,11 +33,11 @@ class SequentialNetwork {
     // finalize also will initialize all the weights
     void finalize_layers();
     //training with 
-    void train(void *X, vector<size_t> const &truth, Optimizer *o);
+    void train(void *X, vector<size_t> const &truth, Optimizer const &o);
     void forward(void *X);
-    float getLoss(SoftMaxObjective &obj, vector<size_t> const &truth);
+    float getLoss(SoftMaxObjective const &obj, vector<size_t> const &truth);
     void backward();
-    void update(Optimizer *opt, float learning_rate);
+    void update(Optimizer const &opt, float learning_rate);
   private:
     //calling this will allocate the data the input pointer points to
     void allocateBuffer(vector<size_t> const &dimensions, void * &data);

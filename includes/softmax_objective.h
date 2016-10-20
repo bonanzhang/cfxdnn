@@ -4,7 +4,7 @@
 #include <cmath>
 class SoftMaxObjective : public Objective {
   public:
-    float computeLossAndGradient(size_t batch_size, size_t n_classes, float const *src, std::vector<size_t> const &truth, float *diffsrc);
+    float computeLossAndGradient(size_t batch_size, size_t n_classes, float const *src, std::vector<size_t> const &truth, float *diffsrc) const;
 };
 
 #endif // SOFTMAX_OBJECTIVE_H

@@ -114,10 +114,10 @@ void SequentialNetwork::finalize_layers() {
     // initialize each primitive's weights
     Initializer init;
     for (int i = 0; i < net_.size(); i++) {
-        net_[i]->initialize(&init);
+        net_[i]->initialize(init);
     }
 }
-void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer *o) {
+void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer const &o) {
     SoftMaxObjective obj;
     for (int i = 0; i < 1000; i++) {
         forward(((float *) X) + i*channel_*height_*width_);
@@ -136,7 +136,7 @@ void SequentialNetwork::forward(void *X) {
         net_[i]->forward();
     }
 }
-float SequentialNetwork::getLoss(SoftMaxObjective &obj, vector<size_t> const &truth) {
+float SequentialNetwork::getLoss(SoftMaxObjective const &obj, vector<size_t> const &truth) {
     return obj.computeLossAndGradient(batch_size_,
                                        classes_,
                                        (float *) data_tensors_[data_tensors_.size()-1],
@@ -151,7 +151,7 @@ void SequentialNetwork::backward() {
         std::cout << "finished" << std::endl;
     }
 }
-void SequentialNetwork::update(Optimizer *opt, float learning_rate) {
+void SequentialNetwork::update(Optimizer const &opt, float learning_rate) {
     std::cout << "update for all " << net_.size() << " net components" << std::endl;
     for (int i = 0; i < net_.size(); i++) {
         std::cout << "net components: " << i << std::endl;

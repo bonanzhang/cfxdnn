@@ -3,7 +3,7 @@
 #include <optimizer.h>
 class SGD : public Optimizer {
   public:
-    void applyOptimization(float* weights, float* grad, size_t n, float learning_rate);
+    void applyOptimization(float* weights, float* grad, size_t n, float learning_rate) const;
 };
 
 #endif // SGD_H

@@ -1,5 +1,5 @@
 #include "initializer.h"
-void Initializer::fill(float *v, int n) {
+void Initializer::fill(float *v, int n) const {
     // TODO: user defined seed, mean, variance
 //    std::random_device rd;
 //    std::mt19937 mt(rd);

@@ -52,11 +52,11 @@ int main() {
     float loss = net.getLoss(obj, ground_truth);
     std::cout << "loss calculation complete" << std::endl;
     std::cout << loss << std::endl;
-//    std::cout << "starting backward pass" << std::endl;
-//    net.backward();
-//    std::cout << "backward pass complete" << std::endl;
-//    net.update(&sgd, 0.001f);
-//    std::cout << "update complete" << std::endl;
+    std::cout << "starting backward pass" << std::endl;
+    net.backward();
+    std::cout << "backward pass complete" << std::endl;
+    net.update(sgd, 0.001f);
+    std::cout << "update complete" << std::endl;
   }
   free(inputData);
   std::cout << "Done" << std::endl;
