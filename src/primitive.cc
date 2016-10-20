@@ -1,18 +1,16 @@
 #include "primitive.h"
 #include <iostream>
-Primitive::Primitive(Layer *l, 
+Primitive::Primitive(Layer *layer, 
                      vector<size_t> const &src_dimensions,
                      vector<size_t> &dst_dimensions)
-    : forward_primitives_(l->getNumberOfFwdPrimitives()),
-      backward_primitives_(l->getNumberOfBwdPrimitives()) {
-  // Initializing resource pointers to null (needed for the update() to work)
+    : forward_primitives_(layer->getNumberOfFwdPrimitives()),
+      backward_primitives_(layer->getNumberOfBwdPrimitives()) {
+  // Every resource starts as a nullptr, gets filled as required by primitives
   for (int i = 0; i < dnnResourceNumber; i++) {
     resources_[i] = nullptr;
   }
-  // Vector containing resouce types that are requested by the layer
-  std::cout << "calling createPrimitives for " << l->getDebugString() << std::endl;
-  l->createPrimitives(src_dimensions, dst_dimensions, forward_primitives_,
-                      backward_primitives_);
+  layer->createPrimitives(src_dimensions, dst_dimensions, 
+                      forward_primitives_, backward_primitives_);
   allocateResourcesForPrimitives(forward_primitives_);
   allocateResourcesForPrimitives(backward_primitives_);
 }
@@ -61,30 +59,34 @@ void Primitive::update(Optimizer const &opt, float learning_rate) {
       resources_[dnnResourceDiffFilter] != nullptr) {
     std::cout << "filter" << std::flush;
     opt.applyOptimization((float *)resources_[dnnResourceFilter],
-                           (float *)resources_[dnnResourceDiffFilter],
-                           resource_sizes_[dnnResourceFilter], learning_rate);
+                          (float *)resources_[dnnResourceDiffFilter],
+                          resource_sizes_[dnnResourceFilter], learning_rate);
   }
   std::cout << "..." << std::flush;
   if (resources_[dnnResourceBias] != nullptr &&
       resources_[dnnResourceDiffBias] != nullptr) {
     std::cout << "bias" << std::flush;
     opt.applyOptimization((float *)resources_[dnnResourceBias],
-                           (float *)resources_[dnnResourceDiffBias],
-                           resource_sizes_[dnnResourceBias], learning_rate);
+                          (float *)resources_[dnnResourceDiffBias],
+                          resource_sizes_[dnnResourceBias], learning_rate);
   }
 }
 void Primitive::initialize(Initializer const &ini) {
   if (resources_[dnnResourceFilter]) {
     ini.fill((float *)resources_[dnnResourceFilter],
-              resource_sizes_[dnnResourceFilter]);
+             resource_sizes_[dnnResourceFilter]);
   }
   if (resources_[dnnResourceBias]) {
     ini.fill((float *)resources_[dnnResourceBias],
-              resource_sizes_[dnnResourceBias]);
+             resource_sizes_[dnnResourceBias]);
   }
 }
-void Primitive::setFwdInput(void *src) { resources_[dnnResourceSrc] = src; }
-void Primitive::setFwdOutput(void *dst) { resources_[dnnResourceDst] = dst; }
+void Primitive::setFwdInput(void *src) {
+  resources_[dnnResourceSrc] = src; 
+}
+void Primitive::setFwdOutput(void *dst) {
+  resources_[dnnResourceDst] = dst; 
+}
 void Primitive::setBwdInput(void *diffdst) {
   resources_[dnnResourceDiffDst] = diffdst;
 }
@@ -98,15 +100,14 @@ void Primitive::allocateResourcesForPrimitives(vector<dnnPrimitive_t> const &pri
   //for each involved primitive, allocate all the resources it wants
   //in this case, it wants a resource if I can create layout from primitive
   //multiple primitives might want the same resource, do not allocate twice
-  vector<dnnResourceType_t> resource_types{dnnResourceFilter,
-                                           dnnResourceDiffFilter,
-                                           dnnResourceBias,
-                                           dnnResourceDiffSrc,
-                                           dnnResourceDiffFilter,
-                                           dnnResourceDiffScaleShift,
-                                           dnnResourceDiffBias,
-                                           dnnResourceDiffDst,
-                                           dnnResourceWorkspace};
+  vector<dnnResourceType_t> resource_types{dnnResourceFilter,     /* 2  */
+                                           dnnResourceBias,       /* 3  */
+                                           dnnResourceDiffFilter, /* 5  */
+                                           dnnResourceDiffBias,   /* 6  */
+                                           dnnResourceWorkspace,  /* 8  */
+                                           dnnResourceMultipleSrc,/* 16 */
+                                           dnnResourceMultipleDst /* 32 */
+                                           };
   for (int i = 0; i < primitives.size(); i++) {
     dnnError_t e;
     dnnLayout_t layout;

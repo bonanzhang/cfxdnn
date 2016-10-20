@@ -1,13 +1,13 @@
 #include "padder.h"
 #include <iostream>
-Padder::Padder(std::vector<size_t> const &src_dimensions, std::vector<size_t> const &padding_size, std::vector<size_t> &dst_dimensions , bool unpad_backwards=false) {
-  const int dimension = src_dimensions.size();
-  const int pad_dimension = padding_size.size();
+Padder::Padder(std::vector<size_t> const &src_dimensions, 
+               std::vector<size_t> const &padding_size, 
+               std::vector<size_t> &dst_dimensions,
+               bool unpad_backwards=false) 
+    : src_dimensions_(src_dimensions),
+      padding_size_(padding_size),
+      unpad_backwards_(unpad_backwards) {
   // TODO: check that dimension is 4 and padding is 2
-  src_dimensions_ = src_dimensions;
-  padding_size_ = padding_size;
-  unpad_backwards_ = unpad_backwards;
-
   std::copy(src_dimensions.begin(), src_dimensions.end(), std::back_inserter(dst_dimensions));
   for(int i = 0; i < padding_size.size(); i++) {
     dst_dimensions[i] += 2 * padding_size[i];

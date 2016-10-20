@@ -179,10 +179,10 @@ void SequentialNetwork::allocateBuffer(vector<size_t> const &dimensions, void * 
     if (e != E_SUCCESS) std::cout << "layout allocate buffer failed\n";
     e = dnnLayoutDelete_F32(layout);
     if (e != E_SUCCESS) std::cout << "layout delete failed\n";
-    std::cout << "Allocate A Buffer with dimensions: ";
-    for (auto const &i : dimensions) {
-        std::cout << i << " ";
-    }
-    std::cout << std::endl;
-    std::cout << "At: " << data << std::endl;
+//    std::cout << "Allocate A Buffer with dimensions: ";
+//    for (auto const &i : dimensions) {
+//        std::cout << i << " ";
+//    }
+//    std::cout << std::endl;
+//    std::cout << "At: " << data << std::endl;
 }

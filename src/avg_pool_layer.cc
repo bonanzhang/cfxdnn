@@ -1,11 +1,10 @@
 #include "avg_pool_layer.h"
 #include <iostream>
-AvgPoolLayer::AvgPoolLayer(size_t kernel_w,
-                            size_t kernel_h,
-                            size_t stride_w,
-                            size_t stride_h,
-                            size_t padding_w,
-                            size_t padding_h) {
+//TODO warnings based on the niput
+//  - padding > kernel_size/2 (max pool outside...)
+AvgPoolLayer::AvgPoolLayer(size_t kernel_w, size_t kernel_h,
+                            size_t stride_w, size_t stride_h,
+                            size_t padding_w, size_t padding_h) {
   kernel_w_  = kernel_w;
   kernel_h_  = kernel_h;
   stride_w_  = stride_w;
@@ -13,13 +12,11 @@ AvgPoolLayer::AvgPoolLayer(size_t kernel_w,
   padding_w_ = padding_w;
   padding_h_ = padding_h;
 
-  //TODO warnings based on the niput
-  //  - padding > kernel_size/2 (max pool outside...)
 }
 void AvgPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
-                                 std::vector<size_t> &dst_dimensions,
-                                 std::vector<dnnPrimitive_t> &fwd_p,
-                                 std::vector<dnnPrimitive_t> &bwd_p) {
+                                    std::vector<size_t> &dst_dimensions,
+                                    std::vector<dnnPrimitive_t> &fwd_p,
+                                    std::vector<dnnPrimitive_t> &bwd_p) {
   size_t const dimension = src_dimensions.size();
   // TODO: Check dimensions
   // Computing Dimensions. AvgPool does not change size. 
@@ -56,12 +53,15 @@ void AvgPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   dnnLayout_t dst_layout;
   dnnLayoutCreate_F32(&dst_layout, dimension, dst_dimensions_, dst_strides_);
   // Creating the Primitives. Only one needed for each for AvgPool
-  dnnPoolingCreateForward_F32(&fwd_p[0], NULL, dnnAlgorithmPoolingAvg, src_layout, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
-  dnnPoolingCreateBackward_F32(&bwd_p[0], NULL, dnnAlgorithmPoolingAvg, src_layout, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
+  dnnPoolingCreateForward_F32(&fwd_p[0], NULL, dnnAlgorithmPoolingAvg,
+                              src_layout, kernel_size_, kernel_stride_, 
+                              input_offset_, dnnBorderZeros);
+  dnnPoolingCreateBackward_F32(&bwd_p[0], NULL, dnnAlgorithmPoolingAvg, 
+                               src_layout, kernel_size_, kernel_stride_,
+                               input_offset_, dnnBorderZeros);
   // Deleting the Layouts
   dnnLayoutDelete_F32(dst_layout);
   dnnLayoutDelete_F32(src_layout);
-  // Requested Resource for AvgPool
 }
 
 size_t AvgPoolLayer::getNumberOfFwdPrimitives() {
