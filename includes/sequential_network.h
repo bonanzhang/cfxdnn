@@ -35,7 +35,7 @@ class SequentialNetwork {
     //training with 
     void train(void *X, vector<size_t> const &truth, Optimizer *o);
     void forward(void *X);
-    float getLoss(SoftMaxObjective *obj, vector<size_t> const &truth);
+    float getLoss(SoftMaxObjective &obj, vector<size_t> const &truth);
     void backward();
     void update(Optimizer *opt, float learning_rate);
   private:

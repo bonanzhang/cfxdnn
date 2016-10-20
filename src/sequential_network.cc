@@ -15,23 +15,29 @@ SequentialNetwork::~SequentialNetwork() {
     for (int i = 1; i < data_tensors_.size(); i++) {
         if (data_tensors_[i] != nullptr) {
             dnnReleaseBuffer_F32(data_tensors_[i]);
+//            std::cout << "releasing data buffer at: " 
+//                      << static_cast<void*>(data_tensors_[i]) << std::endl;
         }
     }
     for (int i = 1; i < gradient_tensors_.size(); i++) {
         if (gradient_tensors_[i] != nullptr) {
             dnnReleaseBuffer_F32(gradient_tensors_[i]);
+//            std::cout << "releasing gradient buffer at: " 
+//                      << static_cast<void*>(gradient_tensors_[i]) << std::endl;
         }
     }
     for (auto p : net_) {
         delete p;
     }
     for (auto l : layers_) {
+//        std::cout << "deleting layer at: " << static_cast<void*>(l) << std::endl;
         delete l;
     }
 }
 int SequentialNetwork::add_layer(Layer *l) {
     int id = layers_.size();
     layers_.push_back(l);
+//    std::cout << "addr of layer: " << static_cast<void*>(l) << std::endl;
     return id;
 }
 void SequentialNetwork::finalize_layers() {
@@ -115,7 +121,7 @@ void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer *o
     SoftMaxObjective obj;
     for (int i = 0; i < 1000; i++) {
         forward(((float *) X) + i*channel_*height_*width_);
-        getLoss(&obj, truth);
+        getLoss(obj, truth);
         backward();
         update(o, 0.001f);
     }
@@ -130,8 +136,8 @@ void SequentialNetwork::forward(void *X) {
         net_[i]->forward();
     }
 }
-float SequentialNetwork::getLoss(SoftMaxObjective *obj, vector<size_t> const &truth) {
-    return obj->computeLossAndGradient(batch_size_,
+float SequentialNetwork::getLoss(SoftMaxObjective &obj, vector<size_t> const &truth) {
+    return obj.computeLossAndGradient(batch_size_,
                                        classes_,
                                        (float *) data_tensors_[data_tensors_.size()-1],
                                        truth,
