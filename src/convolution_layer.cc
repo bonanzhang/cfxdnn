@@ -59,6 +59,7 @@ void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimension
 
   } else {
     int e = dnnConvolutionCreateForward_F32(&fwd_p[0], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
+    // Primitive input output weight buffer size debug messages
     dnnLayout_t dbg_layout;
     dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceSrc);
     std::cout << "conv src: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;

@@ -39,6 +39,16 @@ void FullyConnectedLayer::createPrimitives(std::vector<size_t> const &src_dimens
     // For FC fwd: 0->forward
     dnnInnerProductCreateForward_F32(&fwd_p[0], NULL, dimension, src_dimensions_, output_channels_);
     requested_fwd_resources[0].push_back(dnnResourceFilter);
+    // Primitive input output buffer size debug messages
+    dnnLayout_t dbg_layout;
+    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceSrc);
+    std::cout << "fc src: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
+    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceDst);
+    std::cout << "fc dst: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
+    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, bwd_p[0], dnnResourceDiffSrc);
+    std::cout << "fc diff src: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
+    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, bwd_p[0], dnnResourceDiffDst);
+    std::cout << "fc diff dst: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
 
     // For FC bwd: 0->backward, 1->filter
     dnnInnerProductCreateBackwardData_F32(&bwd_p[0], NULL, dimension, src_dimensions_, output_channels_);

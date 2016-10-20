@@ -70,6 +70,7 @@ void MaxPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   if (e != E_SUCCESS) std::cout << "maxp forward failed\n";
   e = dnnPoolingCreateBackward_F32(&bwd_p[0], NULL, dnnAlgorithmPoolingMax, src_layout, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
   if (e != E_SUCCESS) std::cout << "maxp backward failed\n";
+  // Primitive input output buffer size debug messages
   dnnLayout_t dbg_layout;
   dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceSrc);
   std::cout << "maxp src: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;

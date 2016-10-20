@@ -80,10 +80,10 @@ void Primitive::forward() {
 void Primitive::backward() {
   for (int i = 0; i < backward_primitives_.size(); i++) {
     std::cout << "execute backward with input: " 
-              << resources_[dnnResourceDiffSrc]
+              << resources_[dnnResourceDiffDst] 
               << std::endl << std::flush;
     std::cout << "execute backward with output: " 
-              << resources_[dnnResourceDiffDst] 
+              << resources_[dnnResourceDiffSrc]
               << std::endl << std::flush;
     dnnExecute_F32(backward_primitives_[i], resources_);
     std::cout << "executed" << std::endl;
