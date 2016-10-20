@@ -5,17 +5,11 @@ float SoftMaxObjective::computeLossAndGradient(size_t const batch_size,
                                                float const *src, 
                                                std::vector<size_t> const &truth,
                                                float *diffsrc) const{
-  std::cout << "calculating loss with input: " 
-            << static_cast<const void*>(src) << std::endl;
-  std::cout << "calculating loss with ouput: "
-            << static_cast<void*>(diffsrc) << std::endl;
+//  std::cout << "calculating loss with input: " 
+//            << static_cast<const void*>(src) << std::endl;
+//  std::cout << "calculating loss with ouput: "
+//            << static_cast<void*>(diffsrc) << std::endl;
   float loss = 0.0f;
-//  for(int i = 0; i < batch_size; i++) {
-//    for(int j = 0; j < n_classes; j++) {
-//      std::cout << src[i*n_classes+j] << " "; 
-//    }
-//    std::cout << std::endl; 
-//  }
   // Optimization: Not collapsing because realistically there aren't enough 
   // classes to support both vectorization and multi-threading
   for(int i = 0; i < batch_size; i++) {

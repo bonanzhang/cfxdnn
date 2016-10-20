@@ -45,18 +45,18 @@ int main() {
   net.finalize_layers();
   std::cout << "Starting training" << std::endl;
   
-  for(int i = 0; i < 5; i++) {
+  for(int i = 0; i < 1; i++) {
     std::cout << "training iteration " << i << std::endl;
     net.forward(inputData);
     std::cout << "forward pass complete" << std::endl;
     float loss = net.getLoss(obj, ground_truth);
     std::cout << "loss calculation complete" << std::endl;
     std::cout << loss << std::endl;
-//    std::cout << "starting backward pass" << std::endl;
-//    net.backward();
-//    std::cout << "backward pass complete" << std::endl;
-    net.update(sgd, 0.001f);
-    std::cout << "update complete" << std::endl;
+    std::cout << "starting backward pass" << std::endl;
+    net.backward();
+    std::cout << "backward pass complete" << std::endl;
+//    net.update(sgd, 0.001f);
+//    std::cout << "update complete" << std::endl;
   }
   free(inputData);
   std::cout << "Done" << std::endl;

@@ -33,39 +33,37 @@ Primitive::~Primitive() {
 }
 void Primitive::forward() {
   for (int i = 0; i < forward_primitives_.size(); i++) {
-    std::cout << "execute forward with input: " 
-              << resources_[dnnResourceSrc]
-              << std::endl << std::flush;
-    std::cout << "execute forward with output: "
-              << resources_[dnnResourceDst] 
-              << std::endl << std::flush;
+//    std::cout << "execute forward with input: " 
+//              << resources_[dnnResourceSrc]
+//              << std::endl << std::flush;
+//    std::cout << "execute forward with output: "
+//              << resources_[dnnResourceDst] 
+//              << std::endl << std::flush;
     dnnExecute_F32(forward_primitives_[i], resources_);
   }
 }
 void Primitive::backward() {
   for (int i = 0; i < backward_primitives_.size(); i++) {
-    std::cout << "execute backward with input: " 
-              << resources_[dnnResourceDiffDst] 
-              << std::endl << std::flush;
-    std::cout << "execute backward with output: " 
-              << resources_[dnnResourceDiffSrc]
-              << std::endl << std::flush;
+//    std::cout << "execute backward with input: " 
+//              << resources_[dnnResourceDiffDst] 
+//              << std::endl << std::flush;
+//    std::cout << "execute backward with output: " 
+//              << resources_[dnnResourceDiffSrc]
+//              << std::endl << std::flush;
     dnnExecute_F32(backward_primitives_[i], resources_);
   }
 }
 void Primitive::update(Optimizer const &opt, float learning_rate) {
-  std::cout << "updating..." << std::flush;
   if (resources_[dnnResourceFilter] != nullptr &&
       resources_[dnnResourceDiffFilter] != nullptr) {
-    std::cout << "filter" << std::flush;
+//    std::cout << "updating filter" << std::endl << std::flush;
     opt.applyOptimization((float *)resources_[dnnResourceFilter],
                           (float *)resources_[dnnResourceDiffFilter],
                           resource_sizes_[dnnResourceFilter], learning_rate);
   }
-  std::cout << "..." << std::flush;
   if (resources_[dnnResourceBias] != nullptr &&
       resources_[dnnResourceDiffBias] != nullptr) {
-    std::cout << "bias" << std::flush;
+//    std::cout << "updating bias" << std::endl << std::flush;
     opt.applyOptimization((float *)resources_[dnnResourceBias],
                           (float *)resources_[dnnResourceDiffBias],
                           resource_sizes_[dnnResourceBias], learning_rate);
@@ -117,7 +115,7 @@ void Primitive::allocateResourcesForPrimitives(vector<dnnPrimitive_t> const &pri
                                              primitives[i],
                                              resource_types[j]);
         if (e == E_SUCCESS) {
-          std::cout << "allocating resource type: " << resource_types[j] << std::endl;
+//          std::cout << "allocating resource type: " << resource_types[j] << std::endl;
           dnnAllocateBuffer_F32(&resources_[resource_types[j]], layout);
           resource_sizes_[resource_types[j]] = dnnLayoutGetMemorySize_F32(layout) / sizeof(float);
           dnnLayoutDelete_F32(layout);
