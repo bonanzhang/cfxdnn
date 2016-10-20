@@ -6,21 +6,16 @@
 ConvolutionLayer::ConvolutionLayer(size_t kernel_w, size_t kernel_h,
                                    size_t stride_w, size_t stride_h,
                                    size_t padding_w, size_t padding_h,
-                                   size_t output_c, bool bias) {
-  kernel_w_  = kernel_w;
-  kernel_h_  = kernel_h;
-  stride_w_  = stride_w;
-  stride_h_  = stride_h;
-  padding_w_ = padding_w;
-  padding_h_ = padding_h;
-  output_c_  = output_c;
-  bias_      = bias;
-}
+                                   size_t output_c, bool bias) 
+  : kernel_w_(kernel_w), kernel_h_(kernel_h),
+    stride_w_(stride_w), stride_h_(stride_h),
+    padding_w_(padding_w), padding_h_(padding_h),
+    output_c_(output_c), bias_(bias) { }
 void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
                                  std::vector<size_t> &dst_dimensions,
                                  std::vector<dnnPrimitive_t> &fwd_p,
                                  std::vector<dnnPrimitive_t> &bwd_p) {
-  const size_t dimension = src_dimensions.size();
+  size_t const dimension = src_dimensions.size();
   // TODO: Check dimensions
   // Computing Dimensions. Convolution does not change size. 
   size_t dst_w = std::ceil(((float) (src_dimensions[0]-kernel_w_+2*padding_w_))/stride_w_)+1;
@@ -31,44 +26,54 @@ void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimension
   dst_dimensions.push_back(src_dimensions[3]); 
   // Making a copy of input and output dims because the primitive
   // needs size_t*. Also computing the strides for layout
-  size_t src_dimensions_[dimension], dst_dimensions_[dimension];
+  size_t src_dim_arr[dimension], dst_dim_arr[dimension];
   for(int i = 0; i < dimension; i++) { 
-    src_dimensions_[i] = src_dimensions[i]; 
-    dst_dimensions_[i] = dst_dimensions[i]; 
+    src_dim_arr[i] = src_dimensions[i]; 
+    dst_dim_arr[i] = dst_dimensions[i]; 
   }
-  size_t kernel_size_[2]   = {kernel_w_, kernel_h_};
-  size_t kernel_stride_[2] = {stride_w_, stride_h_};
-  int input_offset_[2]  = {-padding_w_, -padding_h_};
+  size_t kernel_size_arr[2]   = {kernel_w_, kernel_h_};
+  size_t kernel_stride_arr[2] = {stride_w_, stride_h_};
+  int padding_arr[2]  = {-padding_w_, -padding_h_};
   // Creating Convolution primitive. Link to MKL page on convolution primitive:
   // https://software.intel.com/en-us/node/684776
   // Creating the Primitives. Only one needed for each for Convolution
   if(bias_) {
-    dnnConvolutionCreateForwardBias_F32(&fwd_p[0], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
-    // Requested Fwd Resource for Convolution
-
-    dnnConvolutionCreateBackwardData_F32(&bwd_p[0], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
-    dnnConvolutionCreateBackwardFilter_F32(&bwd_p[1], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
-    dnnConvolutionCreateBackwardBias_F32(&bwd_p[2], NULL, dnnAlgorithmConvolutionDirect, dimension, dst_dimensions_);
-    // Requested Bwd Resource for Convolution
-
+    dnnConvolutionCreateForwardBias_F32(&fwd_p[0], NULL,
+                                        dnnAlgorithmConvolutionDirect, dimension,
+                                        src_dim_arr, dst_dim_arr,
+                                        kernel_size_arr, kernel_stride_arr,
+                                        padding_arr, dnnBorderZeros);
   } else {
-    int e = dnnConvolutionCreateForward_F32(&fwd_p[0], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
-    // Primitive input output weight buffer size debug messages
-//    dnnLayout_t dbg_layout;
-//    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceSrc);
-//    std::cout << "conv src: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
-//    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceDst);
-//    std::cout << "conv dst: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
-//    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceFilter);
-//    std::cout << "conv ker: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
-    // Requested Fwd Resource for Convolution
-
-    dnnConvolutionCreateBackwardData_F32(&bwd_p[0], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
-    dnnConvolutionCreateBackwardFilter_F32(&bwd_p[1], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
-    // Requested Bwd Resource for Convolution
+    dnnConvolutionCreateForward_F32(&fwd_p[0], NULL,
+                                    dnnAlgorithmConvolutionDirect, dimension,
+                                    src_dim_arr, dst_dim_arr,
+                                    kernel_size_arr, kernel_stride_arr,
+                                    padding_arr, dnnBorderZeros);
+  }
+  // Primitive input output weight buffer size debug messages
+//  dnnLayout_t dbg_layout;
+//  dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceSrc);
+//  std::cout << "conv src: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
+//  dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceDst);
+//  std::cout << "conv dst: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
+//  dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceFilter);
+//  std::cout << "conv ker: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
+  dnnConvolutionCreateBackwardData_F32(&bwd_p[0], NULL,
+                                       dnnAlgorithmConvolutionDirect, dimension,
+                                       src_dim_arr, dst_dim_arr,
+                                       kernel_size_arr, kernel_stride_arr,
+                                       padding_arr, dnnBorderZeros);
+  dnnConvolutionCreateBackwardFilter_F32(&bwd_p[1], NULL,
+                                         dnnAlgorithmConvolutionDirect, dimension,
+                                         src_dim_arr, dst_dim_arr,
+                                         kernel_size_arr, kernel_stride_arr,
+                                         padding_arr, dnnBorderZeros);
+  if (bias_) {
+    dnnConvolutionCreateBackwardBias_F32(&bwd_p[2], NULL,
+                                         dnnAlgorithmConvolutionDirect,
+                                         dimension, dst_dim_arr);
   }
 }
-
 size_t ConvolutionLayer::getNumberOfFwdPrimitives() {
   // Convolution has one forward primitive
   return 1;
