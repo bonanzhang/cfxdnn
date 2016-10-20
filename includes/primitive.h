@@ -42,13 +42,12 @@ class Primitive : public NetComponent {
     // example, the weights of a given layer
     void* getResource(dnnResourceType_t type);
   private:
+    void allocateResourcesForPrimitives(vector<dnnPrimitive_t> const &primitives);
     // dnnPrimitives is the Intel MKL computational kernel 
     vector<dnnPrimitive_t> forward_primitives_;
     vector<dnnPrimitive_t> backward_primitives_;
     // Contains the resources. Use getResource() to access.
     void* resources_[dnnResourceNumber];
     size_t resource_sizes_[dnnResourceNumber];
-    vector<vector<dnnResourceType_t>> requested_fwd_resources_;
-    vector<vector<dnnResourceType_t>> requested_bwd_resources_;
 };
 #endif // PRIMITIVE_H

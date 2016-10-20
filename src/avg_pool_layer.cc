@@ -19,10 +19,7 @@ AvgPoolLayer::AvgPoolLayer(size_t kernel_w,
 void AvgPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
                                  std::vector<size_t> &dst_dimensions,
                                  std::vector<dnnPrimitive_t> &fwd_p,
-                                 std::vector<dnnPrimitive_t> &bwd_p,
-                                 std::vector<std::vector<dnnResourceType_t>> &requested_fwd_resources,
-                                 std::vector<std::vector<dnnResourceType_t>> &requested_bwd_resources) {
-
+                                 std::vector<dnnPrimitive_t> &bwd_p) {
   size_t const dimension = src_dimensions.size();
   // TODO: Check dimensions
   // Computing Dimensions. AvgPool does not change size. 
@@ -65,8 +62,6 @@ void AvgPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   dnnLayoutDelete_F32(dst_layout);
   dnnLayoutDelete_F32(src_layout);
   // Requested Resource for AvgPool
-  requested_fwd_resources[0].push_back(dnnResourceWorkspace);
-  // bkd also requires workspace, but no need to allocate twice
 }
 
 size_t AvgPoolLayer::getNumberOfFwdPrimitives() {
@@ -79,4 +74,7 @@ size_t AvgPoolLayer::getNumberOfBwdPrimitives() {
 } 
 bool AvgPoolLayer::needsPadding(std::vector<size_t> &padding_size) {
   return false;
+}
+std::string AvgPoolLayer::getDebugString() const {
+  return std::string("AvgPoolLayer");
 }

@@ -21,12 +21,11 @@ public:
   void createPrimitives(std::vector<size_t> const &src_dimensions,
                         std::vector<size_t> &dst_dimensions,
                         std::vector<dnnPrimitive_t> &fwd_p,
-                        std::vector<dnnPrimitive_t> &bwd_p,
-                        std::vector<std::vector<dnnResourceType_t>> &requested_fwd_resources,
-                        std::vector<std::vector<dnnResourceType_t>> &requested_bwd_resources);
+                        std::vector<dnnPrimitive_t> &bwd_p);
   size_t getNumberOfFwdPrimitives();
   size_t getNumberOfBwdPrimitives();
   bool needsPadding(std::vector<size_t> &padding_size);
+  std::string getDebugString() const;
 private:
   size_t kernel_w_;
   size_t kernel_h_;

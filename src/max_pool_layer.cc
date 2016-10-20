@@ -19,9 +19,7 @@ MaxPoolLayer::MaxPoolLayer(size_t kernel_w,
 void MaxPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
                                  std::vector<size_t> &dst_dimensions,
                                  std::vector<dnnPrimitive_t> &fwd_p,
-                                 std::vector<dnnPrimitive_t> &bwd_p,
-                                 std::vector<std::vector<dnnResourceType_t>> &requested_fwd_resources,
-                                 std::vector<std::vector<dnnResourceType_t>> &requested_bwd_resources) {
+                                 std::vector<dnnPrimitive_t> &bwd_p) {
   dnnError_t e;
   size_t const dimension = src_dimensions.size();
   // TODO: Check dimensions
@@ -80,9 +78,6 @@ void MaxPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   // Deleting the Layouts
   dnnLayoutDelete_F32(dst_layout);
   dnnLayoutDelete_F32(src_layout);
-  
-  // Requested Resource for MaxPool
-  requested_fwd_resources[0].push_back(dnnResourceWorkspace);
 }
 
 size_t MaxPoolLayer::getNumberOfFwdPrimitives() {
@@ -95,4 +90,7 @@ size_t MaxPoolLayer::getNumberOfBwdPrimitives() {
 } 
 bool MaxPoolLayer::needsPadding(std::vector<size_t> &padding_size) {
   return false;
+}
+std::string MaxPoolLayer::getDebugString() const {
+  return std::string("MaxPoolLayer");
 }

@@ -6,10 +6,7 @@ ReLULayer::ReLULayer(float negative_slope) {
 void ReLULayer::createPrimitives(std::vector<size_t> const &src_dimensions,
                                  std::vector<size_t> &dst_dimensions,
                                  std::vector<dnnPrimitive_t> &fwd_p,
-                                 std::vector<dnnPrimitive_t> &bwd_p,
-                                 std::vector<std::vector<dnnResourceType_t>> &requested_fwd_resources,
-                                 std::vector<std::vector<dnnResourceType_t>> &requested_bwd_resources) {
-
+                                 std::vector<dnnPrimitive_t> &bwd_p) {
   const size_t dimension = src_dimensions.size();
   // Computing Dimensions. ReLU does not change size. 
   std::copy(src_dimensions.begin(), src_dimensions.end(), std::back_inserter(dst_dimensions));
@@ -55,4 +52,7 @@ size_t ReLULayer::getNumberOfBwdPrimitives() {
 } 
 bool ReLULayer::needsPadding(std::vector<size_t> &padding_size) {
   return false;
+}
+std::string ReLULayer::getDebugString() const {
+  return std::string("ReLULayer");
 }

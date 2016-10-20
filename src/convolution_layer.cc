@@ -19,9 +19,7 @@ ConvolutionLayer::ConvolutionLayer(size_t kernel_w, size_t kernel_h,
 void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
                                  std::vector<size_t> &dst_dimensions,
                                  std::vector<dnnPrimitive_t> &fwd_p,
-                                 std::vector<dnnPrimitive_t> &bwd_p,
-                                 std::vector<std::vector<dnnResourceType_t>> &requested_fwd_resources,
-                                 std::vector<std::vector<dnnResourceType_t>> &requested_bwd_resources) {
+                                 std::vector<dnnPrimitive_t> &bwd_p) {
   const size_t dimension = src_dimensions.size();
   // TODO: Check dimensions
   // Computing Dimensions. Convolution does not change size. 
@@ -47,33 +45,27 @@ void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimension
   if(bias_) {
     dnnConvolutionCreateForwardBias_F32(&fwd_p[0], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
     // Requested Fwd Resource for Convolution
-    requested_fwd_resources[0].push_back(dnnResourceFilter);
-    requested_fwd_resources[0].push_back(dnnResourceBias);
 
     dnnConvolutionCreateBackwardData_F32(&bwd_p[0], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
     dnnConvolutionCreateBackwardFilter_F32(&bwd_p[1], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
     dnnConvolutionCreateBackwardBias_F32(&bwd_p[2], NULL, dnnAlgorithmConvolutionDirect, dimension, dst_dimensions_);
     // Requested Bwd Resource for Convolution
-    requested_bwd_resources[1].push_back(dnnResourceDiffFilter);
-    requested_bwd_resources[2].push_back(dnnResourceDiffBias);
 
   } else {
     int e = dnnConvolutionCreateForward_F32(&fwd_p[0], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
     // Primitive input output weight buffer size debug messages
-    dnnLayout_t dbg_layout;
-    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceSrc);
-    std::cout << "conv src: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
-    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceDst);
-    std::cout << "conv dst: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
-    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceFilter);
-    std::cout << "conv ker: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
+//    dnnLayout_t dbg_layout;
+//    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceSrc);
+//    std::cout << "conv src: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
+//    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceDst);
+//    std::cout << "conv dst: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
+//    dnnLayoutCreateFromPrimitive_F32(&dbg_layout, fwd_p[0], dnnResourceFilter);
+//    std::cout << "conv ker: " << dnnLayoutGetMemorySize_F32(dbg_layout) << std::endl;
     // Requested Fwd Resource for Convolution
-    requested_fwd_resources[0].push_back(dnnResourceFilter);
 
     dnnConvolutionCreateBackwardData_F32(&bwd_p[0], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
     dnnConvolutionCreateBackwardFilter_F32(&bwd_p[1], NULL, dnnAlgorithmConvolutionDirect, dimension, src_dimensions_, dst_dimensions_, kernel_size_, kernel_stride_, input_offset_, dnnBorderZeros);
     // Requested Bwd Resource for Convolution
-    requested_bwd_resources[1].push_back(dnnResourceDiffFilter);
   }
 }
 
@@ -89,4 +81,7 @@ bool ConvolutionLayer::needsPadding(std::vector<size_t> &padding_size) {
   padding_size.push_back(padding_w_);
   padding_size.push_back(padding_h_);
   return true;
+}
+std::string ConvolutionLayer::getDebugString() const {
+  return std::string("ConvolutionLayer");
 }
