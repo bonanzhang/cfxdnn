@@ -37,15 +37,15 @@ void ReLULayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   dnnLayoutDelete_F32(src_layout);
   // No Requested Resource for ReLU
 }
-size_t ReLULayer::getNumberOfFwdPrimitives() {
+size_t ReLULayer::getNumberOfFwdPrimitives() const {
   // ReLU has one forward primitive
   return 1;
 }
-size_t ReLULayer::getNumberOfBwdPrimitives() {
+size_t ReLULayer::getNumberOfBwdPrimitives() const {
   // ReLU has one backward primitive
   return 1;
 } 
-bool ReLULayer::needsPadding(std::vector<size_t> &padding_size) {
+bool ReLULayer::needsPadding(std::vector<size_t> &padding_size) const {
   return false;
 }
 std::string ReLULayer::getDebugString() const {

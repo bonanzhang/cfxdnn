@@ -64,15 +64,15 @@ void AvgPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   dnnLayoutDelete_F32(dst_layout);
   dnnLayoutDelete_F32(src_layout);
 }
-size_t AvgPoolLayer::getNumberOfFwdPrimitives() {
+size_t AvgPoolLayer::getNumberOfFwdPrimitives() const {
   // AvgPool has one forward primitive
   return 1;
 }
-size_t AvgPoolLayer::getNumberOfBwdPrimitives() {
+size_t AvgPoolLayer::getNumberOfBwdPrimitives() const {
   // AvgPool has one backward primitive
   return 1;
 } 
-bool AvgPoolLayer::needsPadding(std::vector<size_t> &padding_size) {
+bool AvgPoolLayer::needsPadding(std::vector<size_t> &padding_size) const {
   return false;
 }
 std::string AvgPoolLayer::getDebugString() const {

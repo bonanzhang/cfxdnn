@@ -44,13 +44,13 @@ void FullyConnectedLayer::createPrimitives(std::vector<size_t> const &src_dimens
     dnnInnerProductCreateBackwardBias_F32(&bwd_p[2], NULL, dimension, src_dimensions_);
   }
 }
-size_t FullyConnectedLayer::getNumberOfFwdPrimitives() {
+size_t FullyConnectedLayer::getNumberOfFwdPrimitives() const {
   return 1;
 }
-size_t FullyConnectedLayer::getNumberOfBwdPrimitives() {
+size_t FullyConnectedLayer::getNumberOfBwdPrimitives() const {
   return (bias_) ? 3 : 2;
 }
-bool FullyConnectedLayer::needsPadding(std::vector<size_t> &padding_size) {
+bool FullyConnectedLayer::needsPadding(std::vector<size_t> &padding_size) const {
   return false;
 }
 std::string FullyConnectedLayer::getDebugString() const {

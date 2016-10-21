@@ -74,15 +74,15 @@ void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimension
                                          dimension, dst_dim_arr);
   }
 }
-size_t ConvolutionLayer::getNumberOfFwdPrimitives() {
+size_t ConvolutionLayer::getNumberOfFwdPrimitives() const {
   // Convolution has one forward primitive
   return 1;
 }
-size_t ConvolutionLayer::getNumberOfBwdPrimitives() {
+size_t ConvolutionLayer::getNumberOfBwdPrimitives() const {
   // Convolution has two or three backward primitive
   return (bias_) ? 3 : 2;
 } 
-bool ConvolutionLayer::needsPadding(std::vector<size_t> &padding_size) {
+bool ConvolutionLayer::needsPadding(std::vector<size_t> &padding_size) const {
   padding_size.push_back(padding_w_);
   padding_size.push_back(padding_h_);
   return true;

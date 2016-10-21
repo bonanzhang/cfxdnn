@@ -64,15 +64,15 @@ void MaxPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   dnnLayoutDelete_F32(dst_layout);
   dnnLayoutDelete_F32(src_layout);
 }
-size_t MaxPoolLayer::getNumberOfFwdPrimitives() {
+size_t MaxPoolLayer::getNumberOfFwdPrimitives() const {
   // MaxPool has one forward primitive
   return 1;
 }
-size_t MaxPoolLayer::getNumberOfBwdPrimitives() {
+size_t MaxPoolLayer::getNumberOfBwdPrimitives() const {
   // MaxPool has one backward primitive
   return 1;
 } 
-bool MaxPoolLayer::needsPadding(std::vector<size_t> &padding_size) {
+bool MaxPoolLayer::needsPadding(std::vector<size_t> &padding_size) const {
   return false;
 }
 std::string MaxPoolLayer::getDebugString() const {
