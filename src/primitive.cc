@@ -16,7 +16,6 @@ Primitive::Primitive(Layer *layer,
 }
 
 Primitive::~Primitive() {
-  std::cout << "forward_primitives_ size: " << forward_primitives_.size() << std::endl;
   // delete forward primitives
   for (int i = 0; i < forward_primitives_.size(); i++) {
     dnnError_t e = dnnDelete_F32(forward_primitives_[i]);

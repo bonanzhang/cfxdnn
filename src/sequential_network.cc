@@ -117,10 +117,12 @@ void SequentialNetwork::finalize_layers() {
         net_[i]->setBwdOutput(gradient_tensors_[i]);
     }
     // initialize each primitive's weights
+    std::cout << "Initializing weights..." << std::flush;
     Initializer init;
     for (int i = 0; i < net_.size(); i++) {
         net_[i]->initialize(init);
     }
+    std::cout << "done" << std::endl;
 }
 void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer const &o) {
     SoftMaxObjective obj;
