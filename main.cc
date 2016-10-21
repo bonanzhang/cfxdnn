@@ -29,14 +29,14 @@ int main() {
 //  net.add_layer(new ConvolutionLayer(5,5, 1,1, 2,2, 32, false)); 
   //component 6
   net.add_layer(new ReLULayer(0.0f)); 
-//  //component 7
-//  net.add_layer(new AvgPoolLayer(3,3, 2,2, 1,1)); 
+  //component 7
+  net.add_layer(new AvgPoolLayer(3,3, 2,2, 1,1)); 
 //  //component 8, 9
 //  net.add_layer(new ConvolutionLayer(5,5, 1,1, 2,2, 64, false)); 
   //component 10
   net.add_layer(new ReLULayer(0.0f)); 
-//  //component 11
-//  net.add_layer(new AvgPoolLayer(3,3, 2,2, 1,1)); 
+  //component 11
+  net.add_layer(new AvgPoolLayer(3,3, 2,2, 1,1)); 
   //component 12
   net.add_layer(new FullyConnectedLayer(64, false)); 
   //component 13
