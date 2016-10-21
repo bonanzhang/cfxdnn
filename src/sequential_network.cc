@@ -13,7 +13,7 @@ SequentialNetwork::~SequentialNetwork() {
                       << static_cast<void*>(data_tensors_[i]) << std::endl;
         }
     }
-    for (int i = 1; i < gradient_tensors_.size(); i++) {
+    for (int i = 0; i < gradient_tensors_.size(); i++) {
         if (gradient_tensors_[i] != nullptr) {
             dnnReleaseBuffer_F32(gradient_tensors_[i]);
             std::cout << "releasing gradient buffer at: " 
