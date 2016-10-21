@@ -45,7 +45,6 @@ void SequentialNetwork::finalize_layers() {
     // the first resource is temporarily empty
     // it will be set by train
     data_tensors_.push_back(nullptr);
-    gradient_tensors_.push_back(nullptr);
     vector<size_t> input_dimensions;
     input_dimensions.push_back(width_);
     input_dimensions.push_back(height_);
@@ -69,10 +68,14 @@ void SequentialNetwork::finalize_layers() {
             net_.push_back(new Padder(input_dimensions, padding_size, padded_dimensions, false));
             void *pad_data;
             void *pad_gradient;
-            allocateBuffer(padded_dimensions, pad_data);
-            allocateBuffer(padded_dimensions, pad_gradient);
             // store the pointers to the buffers
+            allocateBuffer(padded_dimensions, pad_data);
             data_tensors_.push_back(pad_data);
+            if (gradient_tensors_.size() == 0) {
+                allocateBuffer(padded_dimensions, pad_gradient);
+                gradient_tensors_.push_back(pad_gradient);
+            }
+            allocateBuffer(padded_dimensions, pad_gradient);
             gradient_tensors_.push_back(pad_gradient);
             //construct the acutal primitive, which requires
             //the original unpadded source dimensions
@@ -89,8 +92,12 @@ void SequentialNetwork::finalize_layers() {
         // the data and the gradient tensors have the same dimensions
         // this is WHCN
         allocateBuffer(output_dimensions, data);
-        allocateBuffer(output_dimensions, gradient);
         data_tensors_.push_back(data);
+        if (gradient_tensors_.size() == 0) {
+            allocateBuffer(output_dimensions, gradient);
+            gradient_tensors_.push_back(gradient);
+        }
+        allocateBuffer(output_dimensions, gradient);
         gradient_tensors_.push_back(gradient);
         //next layer's input is this layer's output
         input_dimensions = output_dimensions;

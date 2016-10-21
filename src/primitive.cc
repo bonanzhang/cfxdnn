@@ -39,7 +39,8 @@ void Primitive::forward() {
 //    std::cout << "execute forward with output: "
 //              << resources_[dnnResourceDst] 
 //              << std::endl << std::flush;
-    dnnExecute_F32(forward_primitives_[i], resources_);
+    dnnError_t e = dnnExecute_F32(forward_primitives_[i], resources_);
+    std::cout << "forward executed: " << e << std::endl;
   }
 }
 void Primitive::backward() {
@@ -50,7 +51,8 @@ void Primitive::backward() {
 //    std::cout << "execute backward with output: " 
 //              << resources_[dnnResourceDiffSrc]
 //              << std::endl << std::flush;
-    dnnExecute_F32(backward_primitives_[i], resources_);
+    dnnError_t e = dnnExecute_F32(backward_primitives_[i], resources_);
+    std::cout << "backward executed: " << e << std::endl;
   }
 }
 void Primitive::update(Optimizer const &opt, float learning_rate) {
