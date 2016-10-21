@@ -1,8 +1,5 @@
 #include "relu_layer.h"
-ReLULayer::ReLULayer(float negative_slope) {
-  negative_slope_ = negative_slope;
-}
-
+ReLULayer::ReLULayer(float negative_slope) : negative_slope_(negative_slope) { }
 void ReLULayer::createPrimitives(std::vector<size_t> const &src_dimensions,
                                  std::vector<size_t> &dst_dimensions,
                                  std::vector<dnnPrimitive_t> &fwd_p,
@@ -10,7 +7,6 @@ void ReLULayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   const size_t dimension = src_dimensions.size();
   // Computing Dimensions. ReLU does not change size. 
   std::copy(src_dimensions.begin(), src_dimensions.end(), std::back_inserter(dst_dimensions));
-  
   // Making a copy of input and output dims because the primitive
   // needs size_t*. Also computing the strides for layout
   size_t src_dimensions_[dimension], dst_dimensions_[dimension];
@@ -41,7 +37,6 @@ void ReLULayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   dnnLayoutDelete_F32(src_layout);
   // No Requested Resource for ReLU
 }
-
 size_t ReLULayer::getNumberOfFwdPrimitives() {
   // ReLU has one forward primitive
   return 1;

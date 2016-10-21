@@ -1,16 +1,10 @@
 #include "sequential_network.h"
 #include <iostream>
-SequentialNetwork::SequentialNetwork(size_t batch_size, 
-                                     size_t channel, 
-                                     size_t height, 
-                                     size_t width, 
-                                     size_t classes) {
-    batch_size_ = batch_size;
-    channel_ = channel;
-    height_ = height;
-    width_ = width;
-    classes_ = classes;
-}
+SequentialNetwork::SequentialNetwork(size_t batch_size, size_t channel, 
+                                     size_t height, size_t width, 
+                                     size_t classes)
+    : batch_size_(batch_size), channel_(channel),
+      height_(height), width_(width), classes_(classes) {}
 SequentialNetwork::~SequentialNetwork() {
     for (int i = 1; i < data_tensors_.size(); i++) {
         if (data_tensors_[i] != nullptr) {
