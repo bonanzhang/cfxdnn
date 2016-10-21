@@ -21,12 +21,12 @@ int main() {
   SequentialNetwork net(batch_size, input_c, input_h, input_w, n_classes);
 //  //component 0, 1
 //  net.add_layer(new ConvolutionLayer(5,5, 1,1, 2,2, 32, false)); 
-  //component 2
-  net.add_layer(new MaxPoolLayer(3,3, 2,2, 1,1)); 
+//  //component 2
+//  net.add_layer(new MaxPoolLayer(3,3, 2,2, 1,1)); 
   //component 3
   net.add_layer(new ReLULayer(0.0f)); 
-//  //component 4, 5
-//  net.add_layer(new ConvolutionLayer(5,5, 1,1, 2,2, 32, false)); 
+  //component 4, 5
+  net.add_layer(new ConvolutionLayer(5,5, 1,1, 2,2, 32, false)); 
   //component 6
   net.add_layer(new ReLULayer(0.0f)); 
   //component 7

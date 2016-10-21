@@ -16,18 +16,30 @@ Primitive::Primitive(Layer *layer,
 }
 
 Primitive::~Primitive() {
+  std::cout << "forward_primitives_ size: " << forward_primitives_.size() << std::endl;
   // delete forward primitives
   for (int i = 0; i < forward_primitives_.size(); i++) {
-    dnnDelete_F32(forward_primitives_[i]);
+    dnnError_t e = dnnDelete_F32(forward_primitives_[i]);
+    std::cout << "Delete forward primitive " << i << " " << e << std::endl;
   }
   // delete backward primitives
   for (int i = 0; i < backward_primitives_.size(); i++) {
-    dnnDelete_F32(backward_primitives_[i]);
+    dnnError_t e = dnnDelete_F32(backward_primitives_[i]);
+    std::cout << "Delete backward primitive " << i << " " << e << std::endl;
   }
   // delete resource buffers
-  for (int i = 0; i < dnnResourceNumber; i++) {
-    if (resources_[i] != nullptr) {
-      dnnReleaseBuffer_F32(resources_[i]);
+  vector<dnnResourceType_t> resource_types{dnnResourceFilter,     /* 2  */
+                                           dnnResourceBias,       /* 3  */
+                                           dnnResourceDiffFilter, /* 5  */
+                                           dnnResourceDiffBias,   /* 6  */
+                                           dnnResourceWorkspace,  /* 8  */
+                                           dnnResourceMultipleSrc,/* 16 */
+                                           dnnResourceMultipleDst /* 32 */
+                                           };
+  for (int i = 0; i < resource_types.size(); i++) {
+    if (resources_[resource_types[i]] != nullptr) {
+      dnnError_t e = dnnReleaseBuffer_F32(resources_[resource_types[i]]);
+      std::cout << "Delete resource " << resource_types[i] << " " << e << std::endl;
     }
   }
 }

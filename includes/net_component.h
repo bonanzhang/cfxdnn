@@ -15,6 +15,7 @@
 // Padder    (padder.h)
 class NetComponent {
   public:
+    virtual ~NetComponent() { }
     // Forward Propagation for this layer.
     virtual void forward() = 0;
     // Backward Propagation for this layer.
