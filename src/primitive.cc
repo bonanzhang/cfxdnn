@@ -70,25 +70,25 @@ void Primitive::update(Optimizer const &opt, float learning_rate) {
   if (resources_[dnnResourceFilter] != nullptr &&
       resources_[dnnResourceDiffFilter] != nullptr) {
 //    std::cout << "updating filter" << std::endl << std::flush;
-    opt.applyOptimization((float *)resources_[dnnResourceFilter],
-                          (float *)resources_[dnnResourceDiffFilter],
+    opt.applyOptimization(static_cast<float *>(resources_[dnnResourceFilter]),
+                          static_cast<float *>(resources_[dnnResourceDiffFilter]),
                           resource_sizes_[dnnResourceFilter], learning_rate);
   }
   if (resources_[dnnResourceBias] != nullptr &&
       resources_[dnnResourceDiffBias] != nullptr) {
 //    std::cout << "updating bias" << std::endl << std::flush;
-    opt.applyOptimization((float *)resources_[dnnResourceBias],
-                          (float *)resources_[dnnResourceDiffBias],
+    opt.applyOptimization(static_cast<float *>(resources_[dnnResourceBias]),
+                          static_cast<float *>(resources_[dnnResourceDiffBias]),
                           resource_sizes_[dnnResourceBias], learning_rate);
   }
 }
 void Primitive::initialize(Initializer const &ini) {
   if (resources_[dnnResourceFilter]) {
-    ini.fill((float *)resources_[dnnResourceFilter],
+    ini.fill(static_cast<float *>(resources_[dnnResourceFilter]),
              resource_sizes_[dnnResourceFilter]);
   }
   if (resources_[dnnResourceBias]) {
-    ini.fill((float *)resources_[dnnResourceBias],
+    ini.fill(static_cast<float *>(resources_[dnnResourceBias]),
              resource_sizes_[dnnResourceBias]);
   }
 }

@@ -127,7 +127,7 @@ void SequentialNetwork::finalize_layers() {
 void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer const &o) {
     SoftMaxObjective obj;
     for (int i = 0; i < 1000; i++) {
-        forward(((float *) X) + i*channel_*height_*width_);
+        forward(static_cast<float *>(X) + i*channel_*height_*width_);
         getLoss(obj, truth);
         backward();
         update(o, 0.001f);
@@ -144,11 +144,11 @@ void SequentialNetwork::forward(void *X) {
     }
 }
 float SequentialNetwork::getLoss(SoftMaxObjective const &obj, vector<size_t> const &truth) {
-    return obj.computeLossAndGradient(batch_size_,
-                                       classes_,
-                                       (float *) data_tensors_[data_tensors_.size()-1],
-                                       truth,
-                                       (float *) gradient_tensors_[gradient_tensors_.size()-1]);
+    return obj.computeLossAndGradient(
+      batch_size_, classes_,
+      static_cast<float *>(data_tensors_[data_tensors_.size()-1]),
+      truth,
+      static_cast<float *>(gradient_tensors_[gradient_tensors_.size()-1]));
 }
 void SequentialNetwork::backward() {
 //    std::cout << "backard pass for all " << net_.size() << " net components" << std::endl;

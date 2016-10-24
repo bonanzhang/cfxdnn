@@ -8,7 +8,7 @@ int main() {
   size_t const input_h = 224;
   size_t const input_w = 224;
   size_t const n_classes = 1000;
-  float *inputData = (float *) malloc(sizeof(float)*batch_size*input_c*input_h*input_w);
+  float *inputData = static_cast<float *>(malloc(sizeof(float)*batch_size*input_c*input_h*input_w));
   std::cout << "inputData allocated at " << static_cast<void*>(inputData) << std::endl;
   srand(0);
   for(int i = 0; i < batch_size*input_c*input_h*input_w; i++) {

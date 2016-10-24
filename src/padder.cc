@@ -53,15 +53,15 @@ void Padder::initialize(Initializer const &ini) {
 // "Connect" the layers in a neural network. This is done 
 // automatically by network objects (e.g. sequencial_network)
 void Padder::setFwdInput(void* src) {
-  src_ = (float *) src;
+  src_ = static_cast<float *>(src);
 }
 void Padder::setFwdOutput(void* dst) {
-  dst_ = (float *) dst;
+  dst_ = static_cast<float *>(dst);
   // Initialize it to 0 so this does not happen at every call to forward.
 }
 void Padder::setBwdInput(void* diffdst) {
-  diffdst_ = (float *) diffdst;
+  diffdst_ = static_cast<float *>(diffdst);
 }
 void Padder::setBwdOutput(void* diffsrc) {
-  diffsrc_ = (float *) diffsrc;
+  diffsrc_ = static_cast<float *>(diffsrc);
 }
