@@ -33,7 +33,8 @@ void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimension
   }
   size_t kernel_size_arr[2]   = {kernel_w_, kernel_h_};
   size_t kernel_stride_arr[2] = {stride_w_, stride_h_};
-  int padding_arr[2]  = {-padding_w_, -padding_h_};
+  int input_offset_arr[2]  = {-static_cast<int>(padding_h_),
+                              -static_cast<int>(padding_w_)};
   // Creating Convolution primitive. Link to MKL page on convolution primitive:
   // https://software.intel.com/en-us/node/684776
   // Creating the Primitives. Only one needed for each for Convolution
@@ -42,13 +43,13 @@ void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimension
                                         dnnAlgorithmConvolutionDirect, dimension,
                                         src_dim_arr, dst_dim_arr,
                                         kernel_size_arr, kernel_stride_arr,
-                                        padding_arr, dnnBorderZeros);
+                                        input_offset_arr, dnnBorderZeros);
   } else {
     dnnConvolutionCreateForward_F32(&fwd_p[0], NULL,
                                     dnnAlgorithmConvolutionDirect, dimension,
                                     src_dim_arr, dst_dim_arr,
                                     kernel_size_arr, kernel_stride_arr,
-                                    padding_arr, dnnBorderZeros);
+                                    input_offset_arr, dnnBorderZeros);
   }
   // Primitive input output weight buffer size debug messages
 //  dnnLayout_t dbg_layout;
@@ -62,12 +63,12 @@ void ConvolutionLayer::createPrimitives(std::vector<size_t> const &src_dimension
                                        dnnAlgorithmConvolutionDirect, dimension,
                                        src_dim_arr, dst_dim_arr,
                                        kernel_size_arr, kernel_stride_arr,
-                                       padding_arr, dnnBorderZeros);
+                                       input_offset_arr, dnnBorderZeros);
   dnnConvolutionCreateBackwardFilter_F32(&bwd_p[1], NULL,
                                          dnnAlgorithmConvolutionDirect, dimension,
                                          src_dim_arr, dst_dim_arr,
                                          kernel_size_arr, kernel_stride_arr,
-                                         padding_arr, dnnBorderZeros);
+                                         input_offset_arr, dnnBorderZeros);
   if (bias_) {
     dnnConvolutionCreateBackwardBias_F32(&bwd_p[2], NULL,
                                          dnnAlgorithmConvolutionDirect,

@@ -5,6 +5,7 @@
 #include <string>
 class Layer {
 public:
+  virtual ~Layer() { }
   // input:
   //   previous_destination_dimensions
   // outputs:
