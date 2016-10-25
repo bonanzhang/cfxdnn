@@ -1,5 +1,6 @@
 #include "sequential_network.h"
 #include <iostream>
+#include <algorithm>
 SequentialNetwork::SequentialNetwork(size_t batch_size, size_t channel, 
                                      size_t height, size_t width, 
                                      size_t classes)
@@ -96,7 +97,6 @@ void SequentialNetwork::finalize_layers() {
         //next layer's input is this layer's output
         input_dimensions = output_dimensions;
     }
-    
     for (auto p : net_) {
         std::cout << "allocated component at: " << static_cast<void*>(p) << std::endl;
     }
@@ -144,6 +144,7 @@ void SequentialNetwork::forward(void *X) {
     }
 }
 float SequentialNetwork::getLoss(SoftMaxObjective const &obj, vector<size_t> const &truth) {
+    // TODO: size of truth is expected to be the same as the batch size
     return obj.computeLossAndGradient(
       batch_size_, classes_,
       static_cast<float *>(data_tensors_[data_tensors_.size()-1]),
@@ -192,6 +193,6 @@ void SequentialNetwork::allocateBuffer(vector<size_t> const &dimensions, void * 
     for (auto const &i : dimensions) {
         std::cout << i << " ";
     }
-    std::cout << std::endl;
+    std::cout << 4*std::accumulate(dimensions.begin(), dimensions.end(), 1, std::multiplies<size_t>()) << std::endl;
     std::cout << "At: " << data << std::endl;
 }
