@@ -182,6 +182,10 @@ void SequentialNetwork::allocateBuffer(vector<size_t> const &dimensions, void * 
     if (e != E_SUCCESS) std::cout << "layout create failed\n";
     e = dnnAllocateBuffer_F32(&data, layout);
     if (e != E_SUCCESS) std::cout << "layout allocate buffer failed\n";
+    size_t n = dnnLayoutGetMemorySize_F32(layout)/sizeof(float);
+    for (size_t i = 0; i < n; i++) {
+        static_cast<float *>(data)[i] = 0.0f;
+    }
     e = dnnLayoutDelete_F32(layout);
     if (e != E_SUCCESS) std::cout << "layout delete failed\n";
     std::cout << "Allocate A Buffer with dimensions: ";
