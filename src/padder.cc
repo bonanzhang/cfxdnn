@@ -12,6 +12,7 @@ Padder::Padder(std::vector<size_t> const &src_dimensions,
   for(int i = 0; i < padding_size.size(); i++) {
     dst_dimensions[i] += 2 * padding_size[i];
   }
+
 }
 // Forward Propagation for this layer.
 void Padder::forward() {
@@ -22,7 +23,7 @@ void Padder::forward() {
   const int row_pad = padding_size_[0];
   for(int i = 0; i < src_dimensions_[1]; i++) {
     for(int j = 0; j < src_dimensions_[0]; j++) {
-      dst_[(i+col_pad)*ldd+(j+row_pad)] = src_[i*src_dimensions_[0]]; 
+      dst_[(i+col_pad)*ldd+(j+row_pad)] = src_[i*src_dimensions_[0]+j]; 
     }
   } 
 }
@@ -64,4 +65,8 @@ void Padder::setBwdInput(void* diffdst) {
 }
 void Padder::setBwdOutput(void* diffsrc) {
   diffsrc_ = (float *) diffsrc;
+}
+
+std::string Padder::getComponentName() {
+  return "Padding Layer";
 }

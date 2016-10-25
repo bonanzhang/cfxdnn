@@ -13,6 +13,7 @@ Primitive::Primitive(Layer *layer,
                       forward_primitives_, backward_primitives_);
   allocateResourcesForPrimitives(forward_primitives_);
   allocateResourcesForPrimitives(backward_primitives_);
+  component_name = layer->getDebugString();
 }
 
 Primitive::~Primitive() {
@@ -136,4 +137,8 @@ void Primitive::allocateResourcesForPrimitives(vector<dnnPrimitive_t> const &pri
       }
     }
   }
+}
+
+std::string Primitive::getComponentName() {
+  return component_name;
 }

@@ -41,6 +41,7 @@ class Primitive : public NetComponent {
     // Get pointer to buffer (resource). Used to get, for 
     // example, the weights of a given layer
     void* getResource(dnnResourceType_t type);
+    std::string getComponentName();
   private:
     void allocateResourcesForPrimitives(vector<dnnPrimitive_t> const &primitives);
     // dnnPrimitives is the Intel MKL computational kernel 
@@ -49,5 +50,6 @@ class Primitive : public NetComponent {
     // Contains the resources. Use getResource() to access.
     void* resources_[dnnResourceNumber];
     size_t resource_sizes_[dnnResourceNumber];
+    std::string component_name; 
 };
 #endif // PRIMITIVE_H
