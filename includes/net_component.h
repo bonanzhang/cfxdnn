@@ -2,6 +2,7 @@
 #define NET_COMPONENT_H
 #include "optimizer.h"
 #include "initializer.h"
+#include <string>
 // This is an interface
 // it has the functions a layer in a DNN might call:
 // this includes the obvious forward, backward, and update
@@ -32,5 +33,6 @@ class NetComponent {
     virtual void setBwdOutput(void* diffsrc) = 0;
     // Get pointer to buffer (resource). Used to get, for 
     // example, the weights of a given layer
+    virtual std::string getComponentName() = 0;
 };
 #endif // NET_COMPONENT_H

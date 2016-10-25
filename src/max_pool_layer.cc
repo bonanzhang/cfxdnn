@@ -39,7 +39,8 @@ void MaxPoolLayer::createPrimitives(std::vector<size_t> const &src_dimensions,
   }
   size_t kernel_size_arr[2]   = {kernel_h_, kernel_w_};
   size_t kernel_stride_arr[2] = {stride_h_, stride_w_};
-  int input_offset_arr[2]  = {-padding_h_, -padding_w_};
+  int input_offset_arr[2]  = {-static_cast<int>(padding_h_),
+                              -static_cast<int>(padding_w_)};
   // Creating MaxPooling primitive. Link to MKL page on Pooling primitive:
   // https://software.intel.com/en-us/node/684776
   // Creating Layouts needed

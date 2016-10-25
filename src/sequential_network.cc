@@ -139,7 +139,7 @@ void SequentialNetwork::forward(void *X) {
 //    std::cout << "input set for i=0 " << X << std::endl;
 //    std::cout << "forward pass for all " << net_.size() << " net components" << std::endl;
     for (int i = 0; i < net_.size(); i++) {
-        std::cout << "net components: " << i << std::endl;
+        std::cout << "net components: " << i << " (" << net_[i]->getComponentName() << ")" <<std::endl;
         net_[i]->forward();
     }
 }

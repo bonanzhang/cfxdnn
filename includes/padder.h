@@ -1,6 +1,7 @@
 #ifndef PADDER_H
 #define PADDER_H
 #include "net_component.h"
+#include <string>
 // Parent Class for all neural network layers. 
 // This class contains the information about the parameters
 // required toreconstruct the layer (e.g. kernel size for 
@@ -31,6 +32,7 @@ class Padder : public NetComponent {
     void setFwdOutput(void* dst);
     void setBwdInput(void* diffdst);
     void setBwdOutput(void* diffsrc);
+    std::string getComponentName();
   private:
     std::vector<size_t> src_dimensions_;
     std::vector<size_t> padding_size_;
