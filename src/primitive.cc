@@ -1,16 +1,16 @@
 #include "primitive.h"
 #include <iostream>
 Primitive::Primitive(Layer *layer, 
-                     vector<size_t> const &src_dimensions,
-                     vector<size_t> &dst_dimensions)
-    : forward_primitives_(layer->getNumberOfFwdPrimitives()),
+                     vector<size_t> const &src_dimensions) 
+    : input_dimensions_(src_dimensions),
+      forward_primitives_(layer->getNumberOfFwdPrimitives()),
       backward_primitives_(layer->getNumberOfBwdPrimitives()) {
   // Every resource starts as a nullptr, gets filled as required by primitives
   for (int i = 0; i < dnnResourceNumber; i++) {
     resources_[i] = nullptr;
   }
-  layer->createPrimitives(src_dimensions, dst_dimensions, 
-                      forward_primitives_, backward_primitives_);
+  layer->createPrimitives(input_dimensions_, output_dimensions_, 
+                          forward_primitives_, backward_primitives_);
   allocateResourcesForPrimitives(forward_primitives_);
   allocateResourcesForPrimitives(backward_primitives_);
   component_name = layer->getDebugString();
@@ -138,7 +138,9 @@ void Primitive::allocateResourcesForPrimitives(vector<dnnPrimitive_t> const &pri
     }
   }
 }
-
 std::string Primitive::getComponentName() {
   return component_name;
+}
+vector<size_t> Primitive::getOutputDimensions() const {
+  return output_dimensions_;
 }

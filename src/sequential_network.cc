@@ -46,12 +46,13 @@ void SequentialNetwork::finalize_layers() {
     input_dimensions.push_back(channel_);
     input_dimensions.push_back(batch_size_);
     for (int i = 0; i < layers_.size(); i++) {
-        vector<size_t> output_dimensions;
         // each time a primitive is contructed,
         // it requires the input tensor dimensions
         // it gives back the output tensor dimensions,
         // which is used by the next layer as the input
-        net_.push_back(new Primitive(layers_[i], input_dimensions, output_dimensions));
+        Primitive * p = new Primitive(layers_[i], input_dimensions);
+        vector<size_t> output_dimensions = p->getOutputDimensions();
+        net_.push_back(p);
         void *data = nullptr;
         void *gradient = nullptr;
         // the tensor resources are allocated here
@@ -69,7 +70,8 @@ void SequentialNetwork::finalize_layers() {
         input_dimensions = output_dimensions;
     }
     for (auto p : net_) {
-        std::cout << "allocated component at: " << static_cast<void*>(p) << std::endl;
+        std::cout << p->getComponentName() 
+                  << "allocated at: " << static_cast<void*>(p) << std::endl;
     }
 //    std::cout << "layer " << layers_.size() << std::endl
 //              << "data  " << data_tensors_.size() << std::endl

@@ -2,7 +2,6 @@
 #define SEQUENTIAL_NETWORK_H
 #include "net_component.h"
 #include "primitive.h"
-#include "padder.h"
 #include "layer.h"
 #include "softmax_objective.h"
 #include <exception>

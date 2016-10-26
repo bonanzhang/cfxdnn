@@ -20,9 +20,7 @@ using std::vector;
 // simply do nothing.
 class Primitive : public NetComponent {
   public:
-    Primitive(Layer *l,
-              vector<size_t> const &input_dimensions,
-              vector<size_t> &output_dimensions);
+    Primitive(Layer *l, vector<size_t> const &input_dimensions);
     ~Primitive();
     // Forward Propagation for this layer.
     void forward();
@@ -42,7 +40,10 @@ class Primitive : public NetComponent {
     // example, the weights of a given layer
     void* getResource(dnnResourceType_t type);
     std::string getComponentName();
+    vector<size_t> getOutputDimensions() const;
   private:
+    vector<size_t> input_dimensions_;
+    vector<size_t> output_dimensions_;
     void allocateResourcesForPrimitives(vector<dnnPrimitive_t> const &primitives);
     // dnnPrimitives is the Intel MKL computational kernel 
     vector<dnnPrimitive_t> forward_primitives_;
