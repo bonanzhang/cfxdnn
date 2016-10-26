@@ -73,9 +73,6 @@ size_t MaxPoolLayer::getNumberOfBwdPrimitives() const {
   // MaxPool has one backward primitive
   return 1;
 } 
-bool MaxPoolLayer::needsPadding(std::vector<size_t> &padding_size) const {
-  return false;
-}
 std::string MaxPoolLayer::getDebugString() const {
   return std::string("MaxPoolLayer");
 }

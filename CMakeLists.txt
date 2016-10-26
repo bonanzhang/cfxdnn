@@ -7,7 +7,6 @@ set(CFXDNN_LIB_SRCS "${CMAKE_SOURCE_DIR}/src/sequential_network.cc"
                     "${CMAKE_SOURCE_DIR}/src/max_pool_layer.cc"
                     "${CMAKE_SOURCE_DIR}/src/avg_pool_layer.cc"
                     "${CMAKE_SOURCE_DIR}/src/convolution_layer.cc"
-                    "${CMAKE_SOURCE_DIR}/src/padder.cc"
                     "${CMAKE_SOURCE_DIR}/src/initializer.cc"
                     "${CMAKE_SOURCE_DIR}/src/softmax_objective.cc"
                     "${CMAKE_SOURCE_DIR}/src/sgd.cc")

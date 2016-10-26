@@ -50,9 +50,6 @@ size_t FullyConnectedLayer::getNumberOfFwdPrimitives() const {
 size_t FullyConnectedLayer::getNumberOfBwdPrimitives() const {
   return (bias_) ? 3 : 2;
 }
-bool FullyConnectedLayer::needsPadding(std::vector<size_t> &padding_size) const {
-  return false;
-}
 std::string FullyConnectedLayer::getDebugString() const {
   return std::string("FullyConnectedLayer");
 }

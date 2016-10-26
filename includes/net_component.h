@@ -13,7 +13,6 @@
 // Everything here is pure virtual
 // classes that implement this interface:
 // Primitive (primitive.h)
-// Padder    (padder.h)
 class NetComponent {
   public:
     virtual ~NetComponent() { }

@@ -25,7 +25,6 @@ public:
                         std::vector<dnnPrimitive_t> &bwd_p);
   size_t getNumberOfFwdPrimitives() const;
   size_t getNumberOfBwdPrimitives() const;
-  bool needsPadding(std::vector<size_t> &padding_size) const;
   std::string getDebugString() const;
 private:
   size_t kernel_w_;

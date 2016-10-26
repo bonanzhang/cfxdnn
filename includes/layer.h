@@ -19,7 +19,6 @@ public:
   // Returns the number of primitives needed
   virtual size_t getNumberOfFwdPrimitives() const = 0;
   virtual size_t getNumberOfBwdPrimitives() const = 0;
-  virtual bool needsPadding(std::vector<size_t> &padding_size) const = 0;
   virtual std::string getDebugString() const = 0;
 };
 #endif // LAYER_H

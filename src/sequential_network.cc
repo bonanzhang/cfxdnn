@@ -51,36 +51,7 @@ void SequentialNetwork::finalize_layers() {
         // it requires the input tensor dimensions
         // it gives back the output tensor dimensions,
         // which is used by the next layer as the input
-        // the current convolution primitive used needs a padding layer
-        // but this is going to be a transparent layer from the users
-        // the users already did all the work they need to do
-        // by specifying the padding sizes
-        std::vector<size_t> padding_size;
-        if (layers_[i]->needsPadding(padding_size)) {
-            // TODO: that false means not unpadding for back prop
-            // make sure that's always true
-            std::vector<size_t> padded_dimensions;
-            net_.push_back(new Padder(input_dimensions, padding_size, padded_dimensions, false));
-            void *pad_data;
-            void *pad_gradient;
-            // store the pointers to the buffers
-            allocateBuffer(padded_dimensions, pad_data);
-            data_tensors_.push_back(pad_data);
-            if (gradient_tensors_.size() == 0) {
-                allocateBuffer(padded_dimensions, pad_gradient);
-                gradient_tensors_.push_back(pad_gradient);
-            }
-            allocateBuffer(padded_dimensions, pad_gradient);
-            gradient_tensors_.push_back(pad_gradient);
-            //construct the acutal primitive, which requires
-            //the original unpadded source dimensions
-            for(int d = 0; d < padding_size.size(); d++) {
-                padded_dimensions[d] -= 2 * padding_size[d];
-            }
-            net_.push_back(new Primitive(layers_[i], padded_dimensions, output_dimensions));
-        } else {
-            net_.push_back(new Primitive(layers_[i], input_dimensions, output_dimensions));
-        }
+        net_.push_back(new Primitive(layers_[i], input_dimensions, output_dimensions));
         void *data = nullptr;
         void *gradient = nullptr;
         // the tensor resources are allocated here
