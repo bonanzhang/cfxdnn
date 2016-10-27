@@ -4,13 +4,36 @@ Primitive::Primitive(Layer *layer,
                      vector<size_t> const &src_dimensions) 
     : input_dimensions_(src_dimensions),
       forward_primitives_(layer->getNumberOfFwdPrimitives()),
-      backward_primitives_(layer->getNumberOfBwdPrimitives()) {
+      backward_primitives_(layer->getNumberOfBwdPrimitives()),
+      needs_conversion_(false),
+      conversion_primitive_(nullptr),
+      conversion_input_(nullptr),
+      conversion_output_(nullptr) {
   // Every resource starts as a nullptr, gets filled as required by primitives
   for (int i = 0; i < dnnResourceNumber; i++) {
     resources_[i] = nullptr;
   }
   layer->createPrimitives(input_dimensions_, output_dimensions_, 
                           forward_primitives_, backward_primitives_);
+  dnnLayout_t expected_input_layout;
+  dnnLayoutCreateFromPrimitive_F32(&expected_input_layout, forward_primitives_[0], dnnResourceSrc);
+  size_t const dim = input_dimensions_.size();
+  size_t sizes[dim];
+  size_t strides[dim];
+  size_t str = 1;
+  for (int d = 0; d < dim; d++) {
+    sizes[d] = input_dimensions_[d];
+    strides[d] = str;
+    str *= sizes[d];
+  }
+  dnnLayout_t input_layout;
+  dnnLayoutCreate_F32(&input_layout, dim, sizes, strides);
+  if (!dnnLayoutCompare_F32(input_layout, expected_input_layout)) {
+    needs_conversion_ = true;
+    dnnConversionCreate_F32(&conversion_primitive_, 
+                            input_layout, 
+                            expected_input_layout);
+  }
   allocateResourcesForPrimitives(forward_primitives_);
   allocateResourcesForPrimitives(backward_primitives_);
   component_name = layer->getDebugString();
@@ -44,6 +67,9 @@ Primitive::~Primitive() {
   }
 }
 void Primitive::forward() {
+  if (needs_conversion_) {
+    dnnConversionExecute_F32(conversion_primitive_, conversion_input_, conversion_output_);
+  }
   for (int i = 0; i < forward_primitives_.size(); i++) {
 //    std::cout << "execute forward with input: " 
 //              << resources_[dnnResourceSrc]
@@ -94,7 +120,12 @@ void Primitive::initialize(Initializer const &ini) {
   }
 }
 void Primitive::setFwdInput(void *src) {
-  resources_[dnnResourceSrc] = src; 
+  if (needs_conversion_) {
+    conversion_input_ = src;
+    resources_[dnnResourceSrc] = conversion_output_;
+  } else {
+    resources_[dnnResourceSrc] = src; 
+  }
 }
 void Primitive::setFwdOutput(void *dst) {
   resources_[dnnResourceDst] = dst; 

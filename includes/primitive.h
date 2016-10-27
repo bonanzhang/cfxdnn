@@ -45,11 +45,16 @@ class Primitive : public NetComponent {
     vector<size_t> input_dimensions_;
     vector<size_t> output_dimensions_;
     void allocateResourcesForPrimitives(vector<dnnPrimitive_t> const &primitives);
+    // some dnn primitives needs a different layout than one might expect
+    bool needs_conversion_;
+    dnnPrimitive_t conversion_primitive_;
+    void *conversion_input_;
+    void *conversion_output_;
     // dnnPrimitives is the Intel MKL computational kernel 
     vector<dnnPrimitive_t> forward_primitives_;
     vector<dnnPrimitive_t> backward_primitives_;
     // Contains the resources. Use getResource() to access.
-    void* resources_[dnnResourceNumber];
+    void * resources_[dnnResourceNumber];
     size_t resource_sizes_[dnnResourceNumber];
     std::string component_name; 
 };
