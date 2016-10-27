@@ -9,6 +9,7 @@ Primitive::Primitive(Layer *layer,
       conversion_primitive_(nullptr),
       conversion_input_(nullptr),
       conversion_output_(nullptr) {
+  std::cout << "constructor for " << layer->getDebugString() << std::endl;
   // Every resource starts as a nullptr, gets filled as required by primitives
   for (int i = 0; i < dnnResourceNumber; i++) {
     resources_[i] = nullptr;
@@ -33,7 +34,9 @@ Primitive::Primitive(Layer *layer,
     dnnConversionCreate_F32(&conversion_primitive_, 
                             input_layout, 
                             expected_input_layout);
+    dnnAllocateBuffer_F32(&conversion_output_, expected_input_layout);
   }
+  std::cout << (needs_conversion_ ? "needs conversion" : "no conversion needed") << std::endl;
   allocateResourcesForPrimitives(forward_primitives_);
   allocateResourcesForPrimitives(backward_primitives_);
   component_name = layer->getDebugString();

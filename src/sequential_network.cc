@@ -39,12 +39,12 @@ int SequentialNetwork::add_layer(Layer *l) {
 void SequentialNetwork::finalize_layers() {
     // the first resource is temporarily empty
     // it will be set by train
-    data_tensors_.push_back(nullptr);
-    vector<size_t> input_dimensions;
-    input_dimensions.push_back(width_);
-    input_dimensions.push_back(height_);
-    input_dimensions.push_back(channel_);
-    input_dimensions.push_back(batch_size_);
+    void *data = nullptr;
+    data_tensors_.push_back(data);
+    vector<size_t> input_dimensions{width_, height_, channel_, batch_size_};
+    void *gradient = nullptr;
+    allocateBuffer(input_dimensions, gradient);
+    gradient_tensors_.push_back(gradient);
     for (int i = 0; i < layers_.size(); i++) {
         // each time a primitive is contructed,
         // it requires the input tensor dimensions
@@ -53,17 +53,11 @@ void SequentialNetwork::finalize_layers() {
         Primitive * p = new Primitive(layers_[i], input_dimensions);
         vector<size_t> output_dimensions = p->getOutputDimensions();
         net_.push_back(p);
-        void *data = nullptr;
-        void *gradient = nullptr;
         // the tensor resources are allocated here
         // the data and the gradient tensors have the same dimensions
         // this is WHCN
         allocateBuffer(output_dimensions, data);
         data_tensors_.push_back(data);
-        if (gradient_tensors_.size() == 0) {
-            allocateBuffer(output_dimensions, gradient);
-            gradient_tensors_.push_back(gradient);
-        }
         allocateBuffer(output_dimensions, gradient);
         gradient_tensors_.push_back(gradient);
         //next layer's input is this layer's output
