@@ -7,9 +7,16 @@ Conversion::Conversion()
 bool Conversion::needsConversion() const {
     return needs_conversion_;
 }
-void Conversion::checkLayouts(dnnPrimitive_t const &primitive, std::vector<size_t> const &dimensions) {
+void Conversion::checkLayouts(dnnPrimitive_t const &primitive,
+                              dnnResourceType_t const &resource_type,
+                              std::vector<size_t> const &dimensions) {
     dnnLayout_t expected_input_layout;
-    dnnLayoutCreateFromPrimitive_F32(&expected_input_layout, primitive, dnnResourceSrc);
+    dnnError_t e = dnnLayoutCreateFromPrimitive_F32(&expected_input_layout,
+                                                    primitive,
+                                                    resource_type);
+    if (e != E_SUCCESS) {
+        return;
+    }
     size_t const dim = dimensions.size();
     size_t sizes[dim];
     size_t strides[dim];
@@ -28,9 +35,13 @@ void Conversion::checkLayouts(dnnPrimitive_t const &primitive, std::vector<size_
                                 expected_input_layout);
         dnnAllocateBuffer_F32(&conversion_output_, expected_input_layout);
     }
+    dnnLayoutDelete_F32(expected_input_layout);
+    dnnLayoutDelete_F32(input_layout);
 }
 void Conversion::convert() {
-    dnnConversionExecute_F32(conversion_primitive_, conversion_input_, conversion_output_);
+    dnnConversionExecute_F32(conversion_primitive_,
+                             conversion_input_,
+                             conversion_output_);
 }
 void Conversion::setConversionInput(void * const &src) {
     conversion_input_ = src;

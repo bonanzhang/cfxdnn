@@ -15,7 +15,6 @@ int main() {
   std::vector<size_t> ground_truth(batch_size, 0);
   SoftMaxObjective obj;
   SGD sgd;
-
   SequentialNetwork net(batch_size, input_c, input_h, input_w, n_classes);
   net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 64, false)); 
   net.add_layer(new ReLULayer(0.0f)); 
@@ -24,7 +23,7 @@ int main() {
   std::cout << "Finalizing Layers" << std::endl;
   net.finalize_layers();
   std::cout << "Starting training" << std::endl;
-  for(int i = 0; i < 10; i++) {
+  for(int i = 0; i < 4; i++) {
     std::cout << "training iteration " << i << std::endl;
     net.forward(input_data);
     std::cout << "forward pass complete" << std::endl;

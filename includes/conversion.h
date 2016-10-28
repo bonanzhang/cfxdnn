@@ -6,7 +6,8 @@ class Conversion {
   public:
     Conversion();
     bool needsConversion() const;
-    void checkLayouts(dnnPrimitive_t const &primitive, 
+    void checkLayouts(dnnPrimitive_t const &primitive,
+                      dnnResourceType_t const &resource_type,
                       std::vector<size_t> const &dimensions);
     void convert();
     void setConversionInput(void * const &src);
