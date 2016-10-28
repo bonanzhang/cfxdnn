@@ -19,6 +19,7 @@ int main() {
   SequentialNetwork net(batch_size, input_c, input_h, input_w, n_classes);
   net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 64, false)); 
   net.add_layer(new ReLULayer(0.0f)); 
+  net.add_layer(new MaxPoolLayer(2,2, 2,2, 0,0)); 
   net.add_layer(new FullyConnectedLayer(n_classes, false)); 
   std::cout << "Finalizing Layers" << std::endl;
   net.finalize_layers();
@@ -33,8 +34,8 @@ int main() {
     std::cout << "starting backward pass" << std::endl;
     net.backward();
     std::cout << "backward pass complete" << std::endl;
-//    net.update(sgd, 0.001f);
-//    std::cout << "update complete" << std::endl;
+    net.update(sgd, 0.001f);
+    std::cout << "update complete" << std::endl;
   }
   std::cout << "Done" << std::endl;
   return 0;

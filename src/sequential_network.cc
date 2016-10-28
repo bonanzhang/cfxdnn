@@ -106,7 +106,7 @@ void SequentialNetwork::forward(void *X) {
 //    std::cout << "input set for i=0 " << X << std::endl;
 //    std::cout << "forward pass for all " << net_.size() << " net components" << std::endl;
     for (int i = 0; i < net_.size(); i++) {
-        std::cout << "net components: " << i << " (" << net_[i]->getComponentName() << ")" <<std::endl;
+//        std::cout << "net components: " << i << " (" << net_[i]->getComponentName() << ")" <<std::endl;
         net_[i]->forward();
     }
 }
@@ -156,10 +156,12 @@ void SequentialNetwork::allocateBuffer(vector<size_t> const &dimensions, void * 
     }
     e = dnnLayoutDelete_F32(layout);
     if (e != E_SUCCESS) std::cout << "layout delete failed\n";
-    std::cout << "Allocate A Buffer with dimensions: ";
+    std::cout << "Allocate a buffer with dimensions: ";
     for (auto const &i : dimensions) {
         std::cout << i << " ";
     }
-    std::cout << 4*std::accumulate(dimensions.begin(), dimensions.end(), 1, std::multiplies<size_t>()) << std::endl;
-    std::cout << "At: " << data << std::endl;
+    std::cout << "Total buffer size: " 
+              << 4*std::accumulate(dimensions.begin(), dimensions.end(), 1, std::multiplies<size_t>()) 
+              << " bytes" << std::endl;
+//    std::cout << "At: " << data << std::endl;
 }

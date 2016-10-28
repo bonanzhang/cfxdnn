@@ -3,6 +3,7 @@
 Primitive::Primitive(Layer *layer, 
                      vector<size_t> const &src_dimensions) 
     : input_dimensions_(src_dimensions),
+      output_dimensions_(),
       forward_primitives_(layer->getNumberOfFwdPrimitives()),
       backward_primitives_(layer->getNumberOfBwdPrimitives()),
       needs_conversion_(false),
@@ -64,8 +65,9 @@ Primitive::~Primitive() {
                                            };
   for (int i = 0; i < resource_types.size(); i++) {
     if (resources_[resource_types[i]] != nullptr) {
+      std::cout << "Deleting resource " << resource_types[i];
       dnnError_t e = dnnReleaseBuffer_F32(resources_[resource_types[i]]);
-      std::cout << "Delete resource " << resource_types[i] << " " << e << std::endl;
+      std::cout << " completed with status: " << e << std::endl;
     }
   }
 }
@@ -139,9 +141,6 @@ void Primitive::setBwdInput(void *diffdst) {
 void Primitive::setBwdOutput(void *diffsrc) {
   resources_[dnnResourceDiffSrc] = diffsrc;
 }
-void * Primitive::getResource(dnnResourceType_t type) {
-  return resources_[type];
-}
 void Primitive::allocateResourcesForPrimitives(vector<dnnPrimitive_t> const &primitives) {
   //for each involved primitive, allocate all the resources it wants
   //in this case, it wants a resource if I can create layout from primitive
@@ -163,7 +162,7 @@ void Primitive::allocateResourcesForPrimitives(vector<dnnPrimitive_t> const &pri
                                              primitives[i],
                                              resource_types[j]);
         if (e == E_SUCCESS) {
-//          std::cout << "allocating resource type: " << resource_types[j] << std::endl;
+          std::cout << "allocating resource type: " << resource_types[j] << std::endl;
           dnnAllocateBuffer_F32(&resources_[resource_types[j]], layout);
           resource_sizes_[resource_types[j]] = dnnLayoutGetMemorySize_F32(layout) / sizeof(float);
           dnnLayoutDelete_F32(layout);
