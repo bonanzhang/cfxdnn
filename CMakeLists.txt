@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(cfxdnn CXX)
 set(CFXDNN_LIB_SRCS "${CMAKE_SOURCE_DIR}/src/sequential_network.cc"
                     "${CMAKE_SOURCE_DIR}/src/primitive.cc"
+                    "${CMAKE_SOURCE_DIR}/src/conversion.cc"
                     "${CMAKE_SOURCE_DIR}/src/relu_layer.cc"
                     "${CMAKE_SOURCE_DIR}/src/fully_connected_layer.cc"
                     "${CMAKE_SOURCE_DIR}/src/max_pool_layer.cc"

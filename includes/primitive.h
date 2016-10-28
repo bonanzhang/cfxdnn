@@ -5,6 +5,7 @@ using std::vector;
 #include "mkl_dnn.h"
 #include "layer.h"
 #include "net_component.h"
+#include "conversion.h"
 // Parent Class for all neural network layers. 
 // This class contains the information about the parameters
 // required toreconstruct the layer (e.g. kernel size for 
@@ -46,10 +47,7 @@ class Primitive : public NetComponent {
     vector<size_t> output_dimensions_;
     void allocateResourcesForPrimitives(vector<dnnPrimitive_t> const &primitives);
     // some dnn primitives needs a different layout than one might expect
-    bool needs_conversion_;
-    dnnPrimitive_t conversion_primitive_;
-    void *conversion_input_;
-    void *conversion_output_;
+    Conversion forward_conversion_;
     // dnnPrimitives is the Intel MKL computational kernel 
     vector<dnnPrimitive_t> forward_primitives_;
     vector<dnnPrimitive_t> backward_primitives_;
