@@ -2,6 +2,7 @@
 #define CONVERSION_H
 #include "mkl_dnn.h"
 #include <vector>
+#include <iostream>
 class Conversion {
   public:
     Conversion();

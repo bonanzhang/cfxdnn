@@ -10,8 +10,11 @@ bool Conversion::needsConversion() const {
 void Conversion::checkLayouts(dnnPrimitive_t const &primitive,
                               dnnResourceType_t const &resource_type,
                               std::vector<size_t> const &dimensions) {
-    dnnLayout_t expected_input_layout;
-    dnnError_t e = dnnLayoutCreateFromPrimitive_F32(&expected_input_layout,
+    if (needs_conversion_) {
+        return;
+    }
+    dnnLayout_t expected_layout;
+    dnnError_t e = dnnLayoutCreateFromPrimitive_F32(&expected_layout,
                                                     primitive,
                                                     resource_type);
     if (e != E_SUCCESS) {
@@ -26,17 +29,20 @@ void Conversion::checkLayouts(dnnPrimitive_t const &primitive,
         strides[d] = str;
         str *= sizes[d];
     }
-    dnnLayout_t input_layout;
-    dnnLayoutCreate_F32(&input_layout, dim, sizes, strides);
-    if (!dnnLayoutCompare_F32(input_layout, expected_input_layout)) {
-        needs_conversion_ = true;
+    dnnLayout_t actual_layout;
+    dnnLayoutCreate_F32(&actual_layout, dim, sizes, strides);
+    if (!dnnLayoutCompare_F32(actual_layout, expected_layout)) {
         dnnConversionCreate_F32(&conversion_primitive_,
-                                input_layout,
-                                expected_input_layout);
-        dnnAllocateBuffer_F32(&conversion_output_, expected_input_layout);
+                                actual_layout,
+                                expected_layout);
+        dnnAllocateBuffer_F32(&conversion_output_, expected_layout);
+        needs_conversion_ = true;
+        std::cout << "actual buffer size: " << str << std::endl;
+        std::cout << "expected buffer size: "
+                  << dnnLayoutGetMemorySize_F32(expected_layout)/4 << std::endl;
     }
-    dnnLayoutDelete_F32(expected_input_layout);
-    dnnLayoutDelete_F32(input_layout);
+    dnnLayoutDelete_F32(expected_layout);
+    dnnLayoutDelete_F32(actual_layout);
 }
 void Conversion::convert() {
     dnnConversionExecute_F32(conversion_primitive_,

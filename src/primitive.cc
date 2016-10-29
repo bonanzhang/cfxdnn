@@ -1,12 +1,19 @@
 #include "primitive.h"
 #include <iostream>
+vector<dnnResourceType_t> const Primitive::resource_types{
+    dnnResourceFilter,     /* 2  */
+    dnnResourceBias,       /* 3  */
+    dnnResourceDiffFilter, /* 5  */
+    dnnResourceDiffBias,   /* 6  */
+    dnnResourceWorkspace,  /* 8  */
+    dnnResourceMultipleSrc,/* 16 */
+    dnnResourceMultipleDst /* 32 */
+};
 Primitive::Primitive(Layer *layer, 
                      vector<size_t> const &src_dimensions) 
     : input_dimensions_(src_dimensions),
-      output_dimensions_(),
       forward_primitives_(layer->getNumberOfFwdPrimitives()),
-      backward_primitives_(layer->getNumberOfBwdPrimitives()),
-      forward_conversion_() {
+      backward_primitives_(layer->getNumberOfBwdPrimitives()) {
   std::cout << "constructor for " << layer->getDebugString() << std::endl;
   // Every resource starts as a nullptr, gets filled as required by primitives
   for (int i = 0; i < dnnResourceNumber; i++) {
@@ -14,12 +21,22 @@ Primitive::Primitive(Layer *layer,
   }
   layer->createPrimitives(input_dimensions_, output_dimensions_, 
                           forward_primitives_, backward_primitives_);
-  forward_conversion_.checkLayouts(forward_primitives_[0], input_dimensions_);
+  std::cout << "checking forward resources for needed conversions" << std::endl;
+  for (int i = 0; i < forward_primitives_.size(); i++) {
+    forward_conversion_.checkLayouts(forward_primitives_[i],
+                                     dnnResourceSrc,
+                                     input_dimensions_);
+  }
+  std::cout << "checking backward resources for needed conversions" << std::endl;
+  for (int i = 0; i < backward_primitives_.size(); i++) {
+    backward_conversion_.checkLayouts(backward_primitives_[i],
+                                      dnnResourceDiffDst,
+                                      output_dimensions_);
+  }
   allocateResourcesForPrimitives(forward_primitives_);
   allocateResourcesForPrimitives(backward_primitives_);
   component_name = layer->getDebugString();
 }
-
 Primitive::~Primitive() {
   // delete forward primitives
   for (int i = 0; i < forward_primitives_.size(); i++) {
@@ -32,14 +49,6 @@ Primitive::~Primitive() {
     std::cout << "Delete backward primitive " << i << " " << e << std::endl;
   }
   // delete resource buffers
-  vector<dnnResourceType_t> resource_types{dnnResourceFilter,     /* 2  */
-                                           dnnResourceBias,       /* 3  */
-                                           dnnResourceDiffFilter, /* 5  */
-                                           dnnResourceDiffBias,   /* 6  */
-                                           dnnResourceWorkspace,  /* 8  */
-                                           dnnResourceMultipleSrc,/* 16 */
-                                           dnnResourceMultipleDst /* 32 */
-                                           };
   for (int i = 0; i < resource_types.size(); i++) {
     if (resources_[resource_types[i]] != nullptr) {
       std::cout << "Deleting resource " << resource_types[i];
@@ -51,7 +60,6 @@ Primitive::~Primitive() {
 void Primitive::forward() {
   if (forward_conversion_.needsConversion()) {
     forward_conversion_.convert();
-//    dnnConversionExecute_F32(conversion_primitive_, conversion_input_, conversion_output_);
   }
   for (int i = 0; i < forward_primitives_.size(); i++) {
 //    std::cout << "execute forward with input: " 
@@ -65,6 +73,10 @@ void Primitive::forward() {
   }
 }
 void Primitive::backward() {
+  if (backward_conversion_.needsConversion()) {
+    std::cout << "backward needs conversion" << std::endl;
+    backward_conversion_.convert();
+  }
   for (int i = 0; i < backward_primitives_.size(); i++) {
 //    std::cout << "execute backward with input: " 
 //              << resources_[dnnResourceDiffDst] 
@@ -106,8 +118,6 @@ void Primitive::setFwdInput(void *src) {
   if (forward_conversion_.needsConversion()) {
     forward_conversion_.setConversionInput(src);
     resources_[dnnResourceSrc] = forward_conversion_.getConversionOutput();
-//    conversion_input_ = src;
-//    resources_[dnnResourceSrc] = conversion_output_;
   } else {
     resources_[dnnResourceSrc] = src; 
   }
@@ -116,7 +126,12 @@ void Primitive::setFwdOutput(void *dst) {
   resources_[dnnResourceDst] = dst; 
 }
 void Primitive::setBwdInput(void *diffdst) {
-  resources_[dnnResourceDiffDst] = diffdst;
+  if (backward_conversion_.needsConversion()) {
+    backward_conversion_.setConversionInput(diffdst);
+    resources_[dnnResourceDiffDst] = backward_conversion_.getConversionOutput();
+  } else {
+    resources_[dnnResourceDiffDst] = diffdst;
+  }
 }
 void Primitive::setBwdOutput(void *diffsrc) {
   resources_[dnnResourceDiffSrc] = diffsrc;
@@ -125,14 +140,6 @@ void Primitive::allocateResourcesForPrimitives(vector<dnnPrimitive_t> const &pri
   //for each involved primitive, allocate all the resources it wants
   //in this case, it wants a resource if I can create layout from primitive
   //multiple primitives might want the same resource, do not allocate twice
-  vector<dnnResourceType_t> resource_types{dnnResourceFilter,     /* 2  */
-                                           dnnResourceBias,       /* 3  */
-                                           dnnResourceDiffFilter, /* 5  */
-                                           dnnResourceDiffBias,   /* 6  */
-                                           dnnResourceWorkspace,  /* 8  */
-                                           dnnResourceMultipleSrc,/* 16 */
-                                           dnnResourceMultipleDst /* 32 */
-                                           };
   for (int i = 0; i < primitives.size(); i++) {
     dnnError_t e;
     dnnLayout_t layout;

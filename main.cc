@@ -18,12 +18,47 @@ int main() {
   SequentialNetwork net(batch_size, input_c, input_h, input_w, n_classes);
   net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 64, false)); 
   net.add_layer(new ReLULayer(0.0f)); 
+  net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 64, false)); 
+  net.add_layer(new ReLULayer(0.0f)); 
   net.add_layer(new MaxPoolLayer(2,2, 2,2, 0,0)); 
-  net.add_layer(new FullyConnectedLayer(n_classes, false)); 
+
+  net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 128, false)); 
+  net.add_layer(new ReLULayer(0.0f)); 
+  net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 128, false)); 
+  net.add_layer(new ReLULayer(0.0f)); 
+  net.add_layer(new MaxPoolLayer(2,2, 2,2, 0,0)); 
+
+  net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 256, false)); 
+  net.add_layer(new ReLULayer(0.0f)); 
+  net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 256, false)); 
+  net.add_layer(new ReLULayer(0.0f)); 
+  net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 256, false)); 
+  net.add_layer(new ReLULayer(0.0f)); 
+  net.add_layer(new MaxPoolLayer(2,2, 2,2, 0,0)); 
+
+  net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 512, false)); 
+  net.add_layer(new ReLULayer(0.0f)); 
+  net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 512, false)); 
+  net.add_layer(new ReLULayer(0.0f)); 
+  net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 512, false)); 
+  net.add_layer(new ReLULayer(0.0f)); 
+  net.add_layer(new MaxPoolLayer(2,2, 2,2, 0,0)); 
+
+  net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 512, false)); 
+  net.add_layer(new ReLULayer(0.0f)); 
+  net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 512, false)); 
+  net.add_layer(new ReLULayer(0.0f)); 
+  net.add_layer(new ConvolutionLayer(3,3, 1,1, 1,1, 512, false)); 
+  net.add_layer(new ReLULayer(0.0f)); 
+  net.add_layer(new MaxPoolLayer(2,2, 2,2, 0,0)); 
+
+  net.add_layer(new FullyConnectedLayer(4096, false)); 
+  net.add_layer(new FullyConnectedLayer(4096, false)); 
+  net.add_layer(new FullyConnectedLayer(1000, false)); 
   std::cout << "Finalizing Layers" << std::endl;
   net.finalize_layers();
   std::cout << "Starting training" << std::endl;
-  for(int i = 0; i < 4; i++) {
+  for(int i = 0; i < 10; i++) {
     std::cout << "training iteration " << i << std::endl;
     net.forward(input_data);
     std::cout << "forward pass complete" << std::endl;
