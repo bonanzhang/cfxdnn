@@ -1,6 +1,4 @@
 #include "sequential_network.h"
-#include <iostream>
-#include <algorithm>
 SequentialNetwork::SequentialNetwork(size_t batch_size, size_t channel, 
                                      size_t height, size_t width, 
                                      size_t classes)

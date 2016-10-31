@@ -2,6 +2,7 @@
 #include <vector>
 #include <array>
 #include <cfxdnn.h>
+#include "stopwatch.h"
 int main() {
   size_t const batch_size = 32;
   size_t const input_c = 3;
@@ -58,10 +59,13 @@ int main() {
   std::cout << "Finalizing Layers" << std::endl;
   net.finalize_layers();
   std::cout << "Starting training" << std::endl;
+  StopWatch sw;
+  sw.pressPrimaryButton();
   for(int i = 0; i < 10; i++) {
     std::cout << "training iteration " << i << std::endl;
     net.forward(input_data);
     std::cout << "forward pass complete" << std::endl;
+    sw.pressSecondaryButton();
     float loss = net.getLoss(obj, ground_truth);
     std::cout << "loss calculation complete" << std::endl;
     std::cout << loss << std::endl;
@@ -71,6 +75,11 @@ int main() {
 //    net.update(sgd, 0.001f);
 //    std::cout << "update complete" << std::endl;
   }
+  for (auto const &d : sw.getLapTimes()) {
+    std::cout << d << " s" << std::endl;
+  }
+  sw.pressPrimaryButton();
+  sw.pressSecondaryButton();
   std::cout << "Done" << std::endl;
   return 0;
 }

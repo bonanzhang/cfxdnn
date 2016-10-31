@@ -10,7 +10,8 @@ set(CFXDNN_LIB_SRCS "${CMAKE_SOURCE_DIR}/src/sequential_network.cc"
                     "${CMAKE_SOURCE_DIR}/src/convolution_layer.cc"
                     "${CMAKE_SOURCE_DIR}/src/initializer.cc"
                     "${CMAKE_SOURCE_DIR}/src/softmax_objective.cc"
-                    "${CMAKE_SOURCE_DIR}/src/sgd.cc")
+                    "${CMAKE_SOURCE_DIR}/src/sgd.cc"
+                    "${CMAKE_SOURCE_DIR}/src/stopwatch.cc")
 add_library(cfxdnn SHARED ${CFXDNN_LIB_SRCS})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 find_package(MKLRT REQUIRED)
