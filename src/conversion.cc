@@ -37,9 +37,9 @@ void Conversion::checkLayouts(dnnPrimitive_t const &primitive,
                                 expected_layout);
         dnnAllocateBuffer_F32(&conversion_output_, expected_layout);
         needs_conversion_ = true;
-        std::cout << "actual buffer size: " << str << std::endl;
-        std::cout << "expected buffer size: "
-                  << dnnLayoutGetMemorySize_F32(expected_layout)/4 << std::endl;
+//        std::cout << "actual buffer size: " << str << std::endl;
+//        std::cout << "expected buffer size: "
+//                  << dnnLayoutGetMemorySize_F32(expected_layout)/4 << std::endl;
     }
     dnnLayoutDelete_F32(expected_layout);
     dnnLayoutDelete_F32(actual_layout);

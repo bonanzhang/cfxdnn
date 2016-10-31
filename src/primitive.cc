@@ -14,20 +14,20 @@ Primitive::Primitive(Layer *layer,
     : input_dimensions_(src_dimensions),
       forward_primitives_(layer->getNumberOfFwdPrimitives()),
       backward_primitives_(layer->getNumberOfBwdPrimitives()) {
-  std::cout << "constructor for " << layer->getDebugString() << std::endl;
+//  std::cout << "constructor for " << layer->getDebugString() << std::endl;
   // Every resource starts as a nullptr, gets filled as required by primitives
   for (int i = 0; i < dnnResourceNumber; i++) {
     resources_[i] = nullptr;
   }
   layer->createPrimitives(input_dimensions_, output_dimensions_, 
                           forward_primitives_, backward_primitives_);
-  std::cout << "checking forward resources for needed conversions" << std::endl;
+//  std::cout << "checking forward resources for needed conversions" << std::endl;
   for (int i = 0; i < forward_primitives_.size(); i++) {
     forward_conversion_.checkLayouts(forward_primitives_[i],
                                      dnnResourceSrc,
                                      input_dimensions_);
   }
-  std::cout << "checking backward resources for needed conversions" << std::endl;
+//  std::cout << "checking backward resources for needed conversions" << std::endl;
   for (int i = 0; i < backward_primitives_.size(); i++) {
     backward_conversion_.checkLayouts(backward_primitives_[i],
                                       dnnResourceDiffDst,
@@ -41,19 +41,21 @@ Primitive::~Primitive() {
   // delete forward primitives
   for (int i = 0; i < forward_primitives_.size(); i++) {
     dnnError_t e = dnnDelete_F32(forward_primitives_[i]);
-    std::cout << "Delete forward primitive " << i << " " << e << std::endl;
+//    std::cout << "Delete forward primitive " << i 
+//              << " completed with status: " << e << std::endl;
   }
   // delete backward primitives
   for (int i = 0; i < backward_primitives_.size(); i++) {
     dnnError_t e = dnnDelete_F32(backward_primitives_[i]);
-    std::cout << "Delete backward primitive " << i << " " << e << std::endl;
+//    std::cout << "Delete backward primitive " << i 
+//              << " completed with status: " << e << std::endl;
   }
   // delete resource buffers
   for (int i = 0; i < resource_types.size(); i++) {
     if (resources_[resource_types[i]] != nullptr) {
-      std::cout << "Deleting resource " << resource_types[i];
+//      std::cout << "Deleting resource " << resource_types[i];
       dnnError_t e = dnnReleaseBuffer_F32(resources_[resource_types[i]]);
-      std::cout << " completed with status: " << e << std::endl;
+//      std::cout << " completed with status: " << e << std::endl;
     }
   }
 }
@@ -69,7 +71,7 @@ void Primitive::forward() {
 //              << resources_[dnnResourceDst] 
 //              << std::endl << std::flush;
     dnnError_t e = dnnExecute_F32(forward_primitives_[i], resources_);
-    std::cout << "forward executed: " << e << std::endl;
+//    std::cout << "forward executed with status: " << e << std::endl;
   }
 }
 void Primitive::backward() {
@@ -149,7 +151,7 @@ void Primitive::allocateResourcesForPrimitives(vector<dnnPrimitive_t> const &pri
                                              primitives[i],
                                              resource_types[j]);
         if (e == E_SUCCESS) {
-          std::cout << "allocating resource type: " << resource_types[j] << std::endl;
+//          std::cout << "allocating resource type: " << resource_types[j] << std::endl;
           dnnAllocateBuffer_F32(&resources_[resource_types[j]], layout);
           resource_sizes_[resource_types[j]] = dnnLayoutGetMemorySize_F32(layout) / sizeof(float);
           dnnLayoutDelete_F32(layout);

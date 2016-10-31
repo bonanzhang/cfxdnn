@@ -8,23 +8,23 @@ SequentialNetwork::~SequentialNetwork() {
     for (int i = 1; i < data_tensors_.size(); i++) {
         if (data_tensors_[i] != nullptr) {
             dnnReleaseBuffer_F32(data_tensors_[i]);
-            std::cout << "releasing data buffer at: " 
-                      << static_cast<void*>(data_tensors_[i]) << std::endl;
+//            std::cout << "releasing data buffer at: " 
+//                      << static_cast<void*>(data_tensors_[i]) << std::endl;
         }
     }
     for (int i = 0; i < gradient_tensors_.size(); i++) {
         if (gradient_tensors_[i] != nullptr) {
             dnnReleaseBuffer_F32(gradient_tensors_[i]);
-            std::cout << "releasing gradient buffer at: " 
-                      << static_cast<void*>(gradient_tensors_[i]) << std::endl;
+//            std::cout << "releasing gradient buffer at: " 
+//                      << static_cast<void*>(gradient_tensors_[i]) << std::endl;
         }
     }
     for (auto p : net_) {
-        std::cout << "deleting component at: " << static_cast<void*>(p) << std::endl;
+//        std::cout << "deleting component at: " << static_cast<void*>(p) << std::endl;
         delete p;
     }
     for (auto l : layers_) {
-        std::cout << "deleting layer at: " << static_cast<void*>(l) << std::endl;
+//        std::cout << "deleting layer at: " << static_cast<void*>(l) << std::endl;
         delete l;
     }
 }
@@ -61,10 +61,10 @@ void SequentialNetwork::finalize_layers() {
         //next layer's input is this layer's output
         input_dimensions = output_dimensions;
     }
-    for (auto p : net_) {
-        std::cout << p->getComponentName() 
-                  << "allocated at: " << static_cast<void*>(p) << std::endl;
-    }
+//    for (auto p : net_) {
+//        std::cout << p->getComponentName() 
+//                  << " allocated at: " << static_cast<void*>(p) << std::endl;
+//    }
 //    std::cout << "layer " << layers_.size() << std::endl
 //              << "data  " << data_tensors_.size() << std::endl
 //              << "grad  " << gradient_tensors_.size() << std::endl
@@ -154,12 +154,12 @@ void SequentialNetwork::allocateBuffer(vector<size_t> const &dimensions, void * 
     }
     e = dnnLayoutDelete_F32(layout);
     if (e != E_SUCCESS) std::cout << "layout delete failed\n";
-    std::cout << "Allocate a buffer with dimensions: ";
-    for (auto const &i : dimensions) {
-        std::cout << i << " ";
-    }
-    std::cout << "Total buffer size: " 
-              << 4*std::accumulate(dimensions.begin(), dimensions.end(), 1, std::multiplies<size_t>()) 
-              << " bytes" << std::endl;
+//    std::cout << "Allocate a buffer with dimensions: ";
+//    for (auto const &i : dimensions) {
+//        std::cout << i << " ";
+//    }
+//    std::cout << "Total buffer size: " 
+//              << 4*std::accumulate(dimensions.begin(), dimensions.end(), 1, std::multiplies<size_t>()) 
+//              << " bytes" << std::endl;
 //    std::cout << "At: " << data << std::endl;
 }

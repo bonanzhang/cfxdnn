@@ -10,7 +10,7 @@ int main() {
   size_t const input_w = 224;
   size_t const n_classes = 10;
   float *input_data = (float *) malloc(sizeof(float) * batch_size * input_c * input_h * input_w);
-  std::cout << "input_data allocated at " << static_cast<void*>(input_data) << std::endl;
+//  std::cout << "input_data allocated at " << static_cast<void*>(input_data) << std::endl;
   Initializer init;
   init.fill(input_data, batch_size * input_c * input_h * input_w);
   std::vector<size_t> ground_truth(batch_size, 0);
@@ -55,7 +55,7 @@ int main() {
 
   net.add_layer(new FullyConnectedLayer(4096, false)); 
   net.add_layer(new FullyConnectedLayer(4096, false)); 
-  net.add_layer(new FullyConnectedLayer(1000, false)); 
+  net.add_layer(new FullyConnectedLayer(n_classes, false)); 
   std::cout << "Finalizing Layers" << std::endl;
   net.finalize_layers();
   std::cout << "Starting training" << std::endl;
