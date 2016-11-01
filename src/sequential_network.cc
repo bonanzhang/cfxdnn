@@ -88,6 +88,12 @@ void SequentialNetwork::finalize_layers() {
         net_[i]->initialize(init);
     }
     std::cout << "done" << std::endl;
+    for (int i = 0; i < net_.size(); i++) {
+        Primitive * p = dynamic_cast<Primitive *>(net_[i]);
+        if (p != nullptr) {
+            p->initializeConversions();
+        }
+    }
 }
 void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer const &o) {
     SoftMaxObjective obj;

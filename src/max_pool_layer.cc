@@ -1,5 +1,4 @@
 #include "max_pool_layer.h"
-#include <iostream>
 //TODO warnings based on the niput
 //     - padding > kernel_size/2 (max pool outside...)
 MaxPoolLayer::MaxPoolLayer(size_t kernel_w, size_t kernel_h,

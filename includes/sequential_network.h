@@ -33,6 +33,9 @@ class SequentialNetwork {
     int add_layer(Layer *l);
     // must call this after adding all the layers
     // finalize also will initialize all the weights
+    // this contructs all primitives
+    // this allocates src, dst, diffsrc, and diffdst buffers
+    // this checks the primitives for conversion
     void finalize_layers();
     //training with 
     void train(void *X, vector<size_t> const &truth, Optimizer const &o);
@@ -41,15 +44,15 @@ class SequentialNetwork {
     void backward();
     void update(Optimizer const &opt, float learning_rate);
   private:
-    //calling this will allocate the data the input pointer points to
-    void allocateBuffer(vector<size_t> const &dimensions, void * &data);
-    vector<Layer *> layers_;
-    vector<NetComponent *> net_;
     size_t batch_size_;
     size_t channel_;
     size_t height_;
     size_t width_;
     size_t classes_;
+    vector<Layer *> layers_;
+    vector<NetComponent *> net_;
+    //calling this will allocate the data the input pointer points to
+    void allocateBuffer(vector<size_t> const &dimensions, void * &data);
     vector<void *> data_tensors_;
     vector<void *> gradient_tensors_;
 };

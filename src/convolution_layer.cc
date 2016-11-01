@@ -1,5 +1,4 @@
 #include "convolution_layer.h"
-#include <iostream>
 //TODO warnings based on the input
 //  - padding > kernel_size/2 (convolution outside...)
 //  - check that output_c_ is > 0

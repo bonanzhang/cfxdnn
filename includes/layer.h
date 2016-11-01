@@ -3,6 +3,7 @@
 #include "mkl_dnn.h"
 #include <vector>
 #include <string>
+#include <iostream>
 class Layer {
 public:
   virtual ~Layer() { }

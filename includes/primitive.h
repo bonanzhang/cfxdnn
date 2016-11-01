@@ -2,6 +2,7 @@
 #define PRIMITIVE_H
 #include <vector>
 using std::vector;
+#include <iostream>
 #include "mkl_dnn.h"
 #include "layer.h"
 #include "net_component.h"
@@ -37,6 +38,7 @@ class Primitive : public NetComponent {
     void setFwdOutput(void* dst);
     void setBwdInput(void* diffdst);
     void setBwdOutput(void* diffsrc);
+    void initializeConversions();
     // Get pointer to buffer (resource). Used to get, for 
     // example, the weights of a given layer
     void* getResource(dnnResourceType_t type);

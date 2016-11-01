@@ -1,5 +1,4 @@
 #include "fully_connected_layer.h"
-#include <iostream>
 FullyConnectedLayer::FullyConnectedLayer(size_t output_channels, 
                                          bool bias) 
   : output_channels_(output_channels),
