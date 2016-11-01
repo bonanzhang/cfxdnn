@@ -55,5 +55,10 @@ class SequentialNetwork {
     void allocateBuffer(vector<size_t> const &dimensions, void * &data);
     vector<void *> data_tensors_;
     vector<void *> gradient_tensors_;
+    void allocatePrimitives();
+    void allocateConversions();
+    void allocateTensors();
+    void assignTensors();
+    void initializeWeights();
 };
 #endif // SEQUENTIAL_NETWORK_H

@@ -35,32 +35,11 @@ int SequentialNetwork::add_layer(Layer *l) {
     return id;
 }
 void SequentialNetwork::finalize_layers() {
-    // the first resource is temporarily empty
-    // it will be set by train
-    void *data = nullptr;
-    data_tensors_.push_back(data);
-    vector<size_t> input_dimensions{width_, height_, channel_, batch_size_};
-    void *gradient = nullptr;
-    allocateBuffer(input_dimensions, gradient);
-    gradient_tensors_.push_back(gradient);
-    for (int i = 0; i < layers_.size(); i++) {
-        // each time a primitive is contructed,
-        // it requires the input tensor dimensions
-        // it gives back the output tensor dimensions,
-        // which is used by the next layer as the input
-        Primitive * p = new Primitive(layers_[i], input_dimensions);
-        vector<size_t> output_dimensions = p->getOutputDimensions();
-        net_.push_back(p);
-        // the tensor resources are allocated here
-        // the data and the gradient tensors have the same dimensions
-        // this is WHCN
-        allocateBuffer(output_dimensions, data);
-        data_tensors_.push_back(data);
-        allocateBuffer(output_dimensions, gradient);
-        gradient_tensors_.push_back(gradient);
-        //next layer's input is this layer's output
-        input_dimensions = output_dimensions;
-    }
+    allocatePrimitives();
+    allocateConversions();
+    allocateTensors();
+    assignTensors();
+    initializePrimitiveWeights();
 //    for (auto p : net_) {
 //        std::cout << p->getComponentName() 
 //                  << " allocated at: " << static_cast<void*>(p) << std::endl;
@@ -69,31 +48,6 @@ void SequentialNetwork::finalize_layers() {
 //              << "data  " << data_tensors_.size() << std::endl
 //              << "grad  " << gradient_tensors_.size() << std::endl
 //              << "net   " << net_.size() << std::endl;
-    // when all the primitives and the neighboring buffers are ready
-    // the primitives are given the pointers to the buffers
-    for (int i = 0; i < net_.size(); i++) {
-//        std::cout << "i=" << i << " (forward)  from: " << data_tensors_[i] 
-//                  << " to: " << data_tensors_[i+1] << std::endl;
-//        std::cout << "i=" << i << " (backward) from: " << gradient_tensors_[i+1] 
-//                  << " to: " << gradient_tensors_[i] << std::endl;
-        net_[i]->setFwdInput(data_tensors_[i]);
-        net_[i]->setFwdOutput(data_tensors_[i+1]);
-        net_[i]->setBwdInput(gradient_tensors_[i+1]);
-        net_[i]->setBwdOutput(gradient_tensors_[i]);
-    }
-    // initialize each primitive's weights
-    std::cout << "Initializing weights..." << std::flush;
-    Initializer init;
-    for (int i = 0; i < net_.size(); i++) {
-        net_[i]->initialize(init);
-    }
-    std::cout << "done" << std::endl;
-    for (int i = 0; i < net_.size(); i++) {
-        Primitive * p = dynamic_cast<Primitive *>(net_[i]);
-        if (p != nullptr) {
-            p->initializeConversions();
-        }
-    }
 }
 void SequentialNetwork::train(void *X, vector<size_t> const &truth, Optimizer const &o) {
     SoftMaxObjective obj;
@@ -168,4 +122,71 @@ void SequentialNetwork::allocateBuffer(vector<size_t> const &dimensions, void * 
 //              << 4*std::accumulate(dimensions.begin(), dimensions.end(), 1, std::multiplies<size_t>()) 
 //              << " bytes" << std::endl;
 //    std::cout << "At: " << data << std::endl;
+}
+void SequentialNetwork::allocatePrimitives() {
+    vector<size_t> input_dimensions{width_, height_, channel_, batch_size_};
+    for (int i = 0; i < layers_.size(); i++) {
+        // each time a primitive is contructed,
+        // it requires the input tensor dimensions
+        // it gives back the output tensor dimensions,
+        // which is used by the next layer as the input
+        Primitive *p = new Primitive(layers_[i], input_dimensions);
+        net_.push_back(p);
+        //next layer's input is this layer's output
+        input_dimensions = p->getOutputDimensions();
+    }
+}
+void SequentialNetwork::allocateConversions() {
+    for (int i = 0; i < net_.size(); i++) {
+        Primitive * p = dynamic_cast<Primitive *>(net_[i]);
+        if (p != nullptr) {
+            p->initializeConversions();
+        }
+    }
+}
+void SequentialNetwork::allocateTensors() {
+    // the first resource is temporarily empty
+    // it will be set by train
+    void *data = nullptr;
+    data_tensors_.push_back(data);
+    void *gradient = nullptr;
+    vector<size_t> input_dimensions{width_, height_, channel_, batch_size_};
+    allocateBuffer(input_dimensions, gradient);
+    gradient_tensors_.push_back(gradient);
+    for (int i = 0; i < net_.size(); i++) {
+        // the tensor resources are allocated here
+        // the data and the gradient tensors have the same dimensions
+        // this is WHCN
+        Primitive *p = dynamic_cast<Primitive *>(net_[i]);
+        if (p != nullptr) {
+            vector<size_t> output_dimensions = p->getOutputDimensions();
+            allocateBuffer(output_dimensions, data);
+            data_tensors_.push_back(data);
+            allocateBuffer(output_dimensions, gradient);
+            gradient_tensors_.push_back(gradient);
+        }
+    }
+}
+void SequentialNetwork::assignTensors() {
+    // when all the primitives and the neighboring buffers are ready
+    // the primitives are given the pointers to the buffers
+    for (int i = 0; i < net_.size(); i++) {
+//        std::cout << "i=" << i << " (forward)  from: " << data_tensors_[i] 
+//                  << " to: " << data_tensors_[i+1] << std::endl;
+//        std::cout << "i=" << i << " (backward) from: " << gradient_tensors_[i+1] 
+//                  << " to: " << gradient_tensors_[i] << std::endl;
+        net_[i]->setFwdInput(data_tensors_[i]);
+        net_[i]->setFwdOutput(data_tensors_[i+1]);
+        net_[i]->setBwdInput(gradient_tensors_[i+1]);
+        net_[i]->setBwdOutput(gradient_tensors_[i]);
+    }
+}
+void SequentialNetwork::initializeWeights() {
+    // initialize each primitive's weights
+    std::cout << "Initializing weights..." << std::flush;
+    Initializer init;
+    for (int i = 0; i < net_.size(); i++) {
+        net_[i]->initialize(init);
+    }
+    std::cout << "done" << std::endl;
 }
