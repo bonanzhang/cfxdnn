@@ -39,7 +39,7 @@ void SequentialNetwork::finalize_layers() {
     allocateConversions();
     allocateTensors();
     assignTensors();
-    initializePrimitiveWeights();
+    initializeWeights();
 //    for (auto p : net_) {
 //        std::cout << p->getComponentName() 
 //                  << " allocated at: " << static_cast<void*>(p) << std::endl;
@@ -182,11 +182,10 @@ void SequentialNetwork::assignTensors() {
     }
 }
 void SequentialNetwork::initializeWeights() {
-    // initialize each primitive's weights
     std::cout << "Initializing weights..." << std::flush;
     Initializer init;
     for (int i = 0; i < net_.size(); i++) {
         net_[i]->initialize(init);
     }
-    std::cout << "done" << std::endl;
+//    std::cout << "done" << std::endl;
 }
