@@ -165,3 +165,25 @@ std::string Primitive::getComponentName() { return component_name; }
 vector<size_t> Primitive::getOutputDimensions() const {
   return output_dimensions_;
 }
+dnnLayout_t Primitive::getForwardOutputLayout() const {
+  dnnLayout_t layout = nullptr;
+  dnnError_t e;
+  for (int i = 0; i < forward_primitives_.size(); i++) {
+    e = dnnLayoutCreateFromPrimitive_F32(&layout, forward_primitives_[i], dnnResourceDst);
+    if (e == E_SUCCESS) {
+      break;
+    }
+  }
+  return layout;
+}
+dnnLayout_t Primitive::getBackwardOutputLayout() const {
+  dnnLayout_t layout = nullptr;
+  dnnError_t e;
+  for (int i = 0; i < backward_primitives_.size(); i++) {
+    dnnLayoutCreateFromPrimitive_F32(&layout, backward_primitives_[i], dnnResourceDiffSrc);
+    if (e == E_SUCCESS) {
+      break;
+    }
+  }
+  return layout;
+}
