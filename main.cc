@@ -61,7 +61,7 @@ int main() {
   std::cout << "Starting training" << std::endl;
   StopWatch sw;
   sw.pressPrimaryButton();
-  for(int i = 0; i < 10; i++) {
+  for(int i = 0; i < 1; i++) {
     std::cout << "training iteration " << i << std::endl;
     net.forward(input_data);
     std::cout << "forward pass complete" << std::endl;
@@ -69,11 +69,11 @@ int main() {
     float loss = net.getLoss(obj, ground_truth);
     std::cout << "loss calculation complete" << std::endl;
     std::cout << loss << std::endl;
-//    std::cout << "starting backward pass" << std::endl;
-//    net.backward();
-//    std::cout << "backward pass complete" << std::endl;
-//    net.update(sgd, 0.001f);
-//    std::cout << "update complete" << std::endl;
+    std::cout << "starting backward pass" << std::endl;
+    net.backward();
+    std::cout << "backward pass complete" << std::endl;
+    net.update(sgd, 0.001f);
+    std::cout << "update complete" << std::endl;
   }
   for (auto const &d : sw.getLapTimes()) {
     std::cout << d << " s" << std::endl;

@@ -38,12 +38,14 @@ class Primitive : public NetComponent {
     void setFwdOutput(void* dst);
     void setBwdInput(void* diffdst);
     void setBwdOutput(void* diffsrc);
-    void initializeConversions();
+    void initializeForwardConversions(dnnLayout_t const &actual_layout);
+    void initializeBackwardConversions(dnnLayout_t const &actual_layout);
     // Get pointer to buffer (resource). Used to get, for 
     // example, the weights of a given layer
     void* getResource(dnnResourceType_t type);
     std::string getComponentName();
     vector<size_t> getOutputDimensions() const;
+    dnnLayout_t getForwardInputLayout() const;
     dnnLayout_t getForwardOutputLayout() const;
     dnnLayout_t getBackwardInputLayout() const;
     dnnLayout_t getBackwardOutputLayout() const;

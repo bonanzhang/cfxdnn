@@ -113,11 +113,38 @@ void SequentialNetwork::allocatePrimitives() {
     }
 }
 void SequentialNetwork::allocateConversions() {
+    // check if the primitives in the forward pass need conversions
     for (int i = 0; i < net_.size(); i++) {
-        Primitive * p = dynamic_cast<Primitive *>(net_[i]);
-        if (p != nullptr) {
-            p->initializeConversions();
+        Primitive *p = dynamic_cast<Primitive *>(net_[i]);
+        if (p == nullptr) continue;
+        if (i == 0) {
+            std::vector<size_t> dimensions{width_, height_, channel_, batch_size_};
+            size_t const dim = dimensions.size();
+            size_t sizes[dim];
+            size_t strides[dim];
+            size_t str = 1;
+            for (int d = 0; d < dim; d++) {
+              sizes[d] = dimensions[d];
+              strides[d] = str;
+              str *= sizes[d];
+            }
+            dnnLayout_t layout;
+            dnnLayoutCreate_F32(&layout, dim, sizes, strides);
+            p->initializeForwardConversions(layout);
+            dnnLayoutDelete_F32(layout);
+        } else {
+            dnnLayout_t layout = p->getForwardInputLayout();
+            p->initializeForwardConversions(layout);
+            dnnLayoutDelete_F32(layout);
         }
+    }
+    // check if the primitives in the backward pass need conversions
+    for (int i = 0; i < net_.size(); i++) {
+        Primitive *p = dynamic_cast<Primitive *>(net_[i]);
+        if (p == nullptr) continue;
+        dnnLayout_t layout = p->getBackwardInputLayout();
+        p->initializeBackwardConversions(layout);
+        dnnLayoutDelete_F32(layout);
     }
 }
 void SequentialNetwork::allocateTensors() {
@@ -128,31 +155,28 @@ void SequentialNetwork::allocateTensors() {
     data_tensors_.push_back(data);
     for (int i = 0; i < net_.size(); i++) {
         Primitive *p = dynamic_cast<Primitive *>(net_[i]);
-        if (p != nullptr) {
-            dnnLayout_t layout = p->getForwardOutputLayout();
-            allocateBufferFromLayout(layout, data);
-            dnnLayoutDelete_F32(layout);
-            data_tensors_.push_back(data);
-        }
+        if (p == nullptr) continue;
+        dnnLayout_t layout = p->getForwardOutputLayout();
+        allocateBufferFromLayout(layout, data);
+        dnnLayoutDelete_F32(layout);
+        data_tensors_.push_back(data);
     }
     // Allocate all the backward pass gradient buffers
     void *gradient = nullptr;
     for (int i = 0; i < net_.size(); i++) {
         Primitive *p = dynamic_cast<Primitive *>(net_[i]);
-        if (p != nullptr) {
-            dnnLayout_t layout = p->getBackwardOutputLayout();
-            allocateBufferFromLayout(layout, gradient);
-            dnnLayoutDelete_F32(layout);
-            gradient_tensors_.push_back(gradient);
-        }
-    }
-    Primitive *last_primitive = dynamic_cast<Primitive *>(net_[net_.size()-1]);
-    if (last_primitive != nullptr) {
-        dnnLayout_t layout = last_primitive->getBackwardInputLayout();
+        if (p == nullptr) continue;
+        dnnLayout_t layout = p->getBackwardOutputLayout();
         allocateBufferFromLayout(layout, gradient);
         dnnLayoutDelete_F32(layout);
         gradient_tensors_.push_back(gradient);
     }
+    Primitive *last_primitive = dynamic_cast<Primitive *>(net_[net_.size()-1]);
+    if (last_primitive == nullptr) return;
+    dnnLayout_t layout = last_primitive->getBackwardInputLayout();
+    allocateBufferFromLayout(layout, gradient);
+    dnnLayoutDelete_F32(layout);
+    gradient_tensors_.push_back(gradient);
 }
 void SequentialNetwork::assignTensors() {
     // when all the primitives and the neighboring buffers are ready

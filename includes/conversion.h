@@ -9,7 +9,7 @@ class Conversion {
     bool needsConversion() const;
     void checkLayouts(dnnPrimitive_t const &primitive,
                       dnnResourceType_t const &resource_type,
-                      std::vector<size_t> const &dimensions);
+                      dnnLayout_t const &actual_layout);
     void convert();
     void setConversionInput(void * const &src);
     void * getConversionOutput() const;

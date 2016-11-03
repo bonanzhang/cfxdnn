@@ -103,18 +103,20 @@ void Primitive::initialize(Initializer const &ini) {
              resource_sizes_[dnnResourceBias]);
   }
 }
-void Primitive::initializeConversions() {
+void Primitive::initializeForwardConversions(dnnLayout_t const &actual_layout) {
 //  std::cout << "checking forward resources for needed conversions" <<
 //  std::endl;
   for (int i = 0; i < forward_primitives_.size(); i++) {
     forward_conversion_.checkLayouts(forward_primitives_[i], dnnResourceSrc,
-                                     input_dimensions_);
+                                     actual_layout);
   }
+}
+void Primitive::initializeBackwardConversions(dnnLayout_t const &actual_layout) {
 //  std::cout << "checking backward resources for needed conversions" <<
 //  std::endl;
   for (int i = 0; i < backward_primitives_.size(); i++) {
     backward_conversion_.checkLayouts(backward_primitives_[i],
-                                      dnnResourceDiffDst, output_dimensions_);
+                                      dnnResourceDiffDst, actual_layout);
   }
 }
 void Primitive::setFwdInput(void *src) {
@@ -164,6 +166,17 @@ void Primitive::allocateResourcesForPrimitives(
 std::string Primitive::getComponentName() { return component_name; }
 vector<size_t> Primitive::getOutputDimensions() const {
   return output_dimensions_;
+}
+dnnLayout_t Primitive::getForwardInputLayout() const {
+  dnnLayout_t layout = nullptr;
+  dnnError_t e;
+  for (int i = 0; i < forward_primitives_.size(); i++) {
+    dnnLayoutCreateFromPrimitive_F32(&layout, forward_primitives_[i], dnnResourceSrc);
+    if (e == E_SUCCESS) {
+      break;
+    }
+  }
+  return layout;
 }
 dnnLayout_t Primitive::getForwardOutputLayout() const {
   dnnLayout_t layout = nullptr;
