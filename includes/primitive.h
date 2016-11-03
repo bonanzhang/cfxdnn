@@ -45,6 +45,7 @@ class Primitive : public NetComponent {
     std::string getComponentName();
     vector<size_t> getOutputDimensions() const;
     dnnLayout_t getForwardOutputLayout() const;
+    dnnLayout_t getBackwardInputLayout() const;
     dnnLayout_t getBackwardOutputLayout() const;
   private:
     static const vector<dnnResourceType_t> resource_types;

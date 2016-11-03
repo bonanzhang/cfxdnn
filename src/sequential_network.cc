@@ -90,38 +90,14 @@ void SequentialNetwork::update(Optimizer const &opt, float learning_rate) {
         net_[i]->update(opt, learning_rate);
     }
 }
-void SequentialNetwork::allocateBuffer(vector<size_t> const &dimensions, void * &data) {
-    // calculate the buffer sizes
-    size_t const dim = dimensions.size();
-    size_t sizes[dim];
-    size_t str = 1;
-    size_t strides[dim];
-    for (int d = 0; d < dim; d++) {
-        sizes[d] = dimensions[d];
-        strides[d] = str;
-        str *= sizes[d];
-    }
-    // allocate the buffers
+void SequentialNetwork::allocateBufferFromLayout(dnnLayout_t const &layout, void *&data) {
     dnnError_t e;
-    dnnLayout_t layout;
-    e = dnnLayoutCreate_F32(&layout, dim, sizes, strides);
-    if (e != E_SUCCESS) std::cout << "layout create failed\n";
     e = dnnAllocateBuffer_F32(&data, layout);
     if (e != E_SUCCESS) std::cout << "layout allocate buffer failed\n";
     size_t n = dnnLayoutGetMemorySize_F32(layout)/sizeof(float);
     for (size_t i = 0; i < n; i++) {
         static_cast<float *>(data)[i] = 0.0f;
     }
-    e = dnnLayoutDelete_F32(layout);
-    if (e != E_SUCCESS) std::cout << "layout delete failed\n";
-//    std::cout << "Allocate a buffer with dimensions: ";
-//    for (auto const &i : dimensions) {
-//        std::cout << i << " ";
-//    }
-//    std::cout << "Total buffer size: " 
-//              << 4*std::accumulate(dimensions.begin(), dimensions.end(), 1, std::multiplies<size_t>()) 
-//              << " bytes" << std::endl;
-//    std::cout << "At: " << data << std::endl;
 }
 void SequentialNetwork::allocatePrimitives() {
     vector<size_t> input_dimensions{width_, height_, channel_, batch_size_};
@@ -145,26 +121,37 @@ void SequentialNetwork::allocateConversions() {
     }
 }
 void SequentialNetwork::allocateTensors() {
+    // Allocate all the forward pass data buffers
     // the first resource is temporarily empty
     // it will be set by train
     void *data = nullptr;
     data_tensors_.push_back(data);
-    void *gradient = nullptr;
-    vector<size_t> input_dimensions{width_, height_, channel_, batch_size_};
-    allocateBuffer(input_dimensions, gradient);
-    gradient_tensors_.push_back(gradient);
     for (int i = 0; i < net_.size(); i++) {
-        // the tensor resources are allocated here
-        // the data and the gradient tensors have the same dimensions
-        // this is WHCN
         Primitive *p = dynamic_cast<Primitive *>(net_[i]);
         if (p != nullptr) {
-            vector<size_t> output_dimensions = p->getOutputDimensions();
-            allocateBuffer(output_dimensions, data);
+            dnnLayout_t layout = p->getForwardOutputLayout();
+            allocateBufferFromLayout(layout, data);
+            dnnLayoutDelete_F32(layout);
             data_tensors_.push_back(data);
-            allocateBuffer(output_dimensions, gradient);
+        }
+    }
+    // Allocate all the backward pass gradient buffers
+    void *gradient = nullptr;
+    for (int i = 0; i < net_.size(); i++) {
+        Primitive *p = dynamic_cast<Primitive *>(net_[i]);
+        if (p != nullptr) {
+            dnnLayout_t layout = p->getBackwardOutputLayout();
+            allocateBufferFromLayout(layout, gradient);
+            dnnLayoutDelete_F32(layout);
             gradient_tensors_.push_back(gradient);
         }
+    }
+    Primitive *last_primitive = dynamic_cast<Primitive *>(net_[net_.size()-1]);
+    if (last_primitive != nullptr) {
+        dnnLayout_t layout = last_primitive->getBackwardInputLayout();
+        allocateBufferFromLayout(layout, gradient);
+        dnnLayoutDelete_F32(layout);
+        gradient_tensors_.push_back(gradient);
     }
 }
 void SequentialNetwork::assignTensors() {

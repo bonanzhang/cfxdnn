@@ -176,6 +176,17 @@ dnnLayout_t Primitive::getForwardOutputLayout() const {
   }
   return layout;
 }
+dnnLayout_t Primitive::getBackwardInputLayout() const {
+  dnnLayout_t layout = nullptr;
+  dnnError_t e;
+  for (int i = 0; i < backward_primitives_.size(); i++) {
+    dnnLayoutCreateFromPrimitive_F32(&layout, backward_primitives_[i], dnnResourceDiffDst);
+    if (e == E_SUCCESS) {
+      break;
+    }
+  }
+  return layout;
+}
 dnnLayout_t Primitive::getBackwardOutputLayout() const {
   dnnLayout_t layout = nullptr;
   dnnError_t e;

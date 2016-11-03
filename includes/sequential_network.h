@@ -52,7 +52,7 @@ class SequentialNetwork {
     vector<Layer *> layers_;
     vector<NetComponent *> net_;
     //calling this will allocate the data the input pointer points to
-    void allocateBuffer(vector<size_t> const &dimensions, void * &data);
+    void allocateBufferFromLayout(dnnLayout_t const &layout, void * &data);
     vector<void *> data_tensors_;
     vector<void *> gradient_tensors_;
     void allocatePrimitives();
